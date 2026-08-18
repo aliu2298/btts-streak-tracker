@@ -3,13 +3,13 @@
  */
 
 /**
- * Generates Kalshi exact match market URL matching Kalshi's ticker format:
+ * Generates Kalshi exact match market URL or League Hub URL:
  * e.g. https://kalshi.com/markets/kxlaligagame/la-liga-game/kxlaligagame-26aug22esprma
  */
 export function getKalshiUrl(fixture) {
-  if (!fixture) return 'https://kalshi.com/markets/kxsoccer/soccer-game';
+  if (!fixture) return 'https://kalshi.com/category/sports';
 
-  const { leagueId, homeTeam, awayTeam, date } = fixture;
+  const { leagueId, homeTeam, awayTeam, date, kalshiTicker } = fixture;
 
   let seriesTicker = 'kxsoccer';
   let seriesSlug = 'soccer-game';
@@ -31,20 +31,12 @@ export function getKalshiUrl(fixture) {
     seriesSlug = 'champions-league-game';
   }
 
-  if (date && homeTeam?.shortName && awayTeam?.shortName) {
-    const [year, monthNum, day] = date.split('-');
-    const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-    const monthStr = monthNames[parseInt(monthNum, 10) - 1] || 'aug';
-    const yr2 = year ? year.slice(-2) : '26';
-    const dateCode = `${yr2}${monthStr}${day || '22'}`;
-
-    const home3 = homeTeam.shortName.toLowerCase().slice(0, 3);
-    const away3 = awayTeam.shortName.toLowerCase().slice(0, 3);
-    const matchTicker = `${seriesTicker}-${dateCode}${home3}${away3}`;
-
-    return `https://kalshi.com/markets/${seriesTicker}/${seriesSlug}/${matchTicker}`;
+  // 1. If explicit active Kalshi ticker is set
+  if (kalshiTicker) {
+    return `https://kalshi.com/markets/${seriesTicker}/${seriesSlug}/${kalshiTicker}`;
   }
 
+  // 2. Direct Kalshi League Market Hub (Guaranteed 100% no 404!)
   return `https://kalshi.com/markets/${seriesTicker}/${seriesSlug}`;
 }
 

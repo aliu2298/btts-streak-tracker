@@ -190,6 +190,7 @@ export function generateFixtures() {
         { date: '2025-05-19', score: '4-4', btts: true },
         { date: '2024-12-17', score: '4-1', btts: true }
       ],
+      kalshiTicker: 'kxlaligagame-26aug22esprma',
       bookmakerBTTSOdds: { yes: 1.62, no: 2.20 }
     },
     {
