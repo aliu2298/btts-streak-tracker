@@ -200,7 +200,7 @@ export default function FixtureDetailModal({ fixture, metrics, onClose }) {
                 {homeTeam.name} (Recent)
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                {homeTeam.recentMatches.map((m, i) => (
+                {(homeTeam.recentMatches || []).map((m, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', padding: '0.25rem 0.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '4px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>vs {m.opponent}</span>
                     <span style={{ fontWeight: 700, color: m.btts ? 'var(--accent-emerald)' : 'var(--text-dim)' }}>
@@ -208,6 +208,11 @@ export default function FixtureDetailModal({ fixture, metrics, onClose }) {
                     </span>
                   </div>
                 ))}
+                {(homeTeam.recentMatches || []).length === 0 && (
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
+                    No recent results available.
+                  </span>
+                )}
               </div>
             </div>
 
@@ -217,7 +222,7 @@ export default function FixtureDetailModal({ fixture, metrics, onClose }) {
                 {awayTeam.name} (Recent)
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                {awayTeam.recentMatches.map((m, i) => (
+                {(awayTeam.recentMatches || []).map((m, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', padding: '0.25rem 0.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '4px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>vs {m.opponent}</span>
                     <span style={{ fontWeight: 700, color: m.btts ? 'var(--accent-emerald)' : 'var(--text-dim)' }}>
@@ -225,6 +230,11 @@ export default function FixtureDetailModal({ fixture, metrics, onClose }) {
                     </span>
                   </div>
                 ))}
+                {(awayTeam.recentMatches || []).length === 0 && (
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
+                    No recent results available.
+                  </span>
+                )}
               </div>
             </div>
 

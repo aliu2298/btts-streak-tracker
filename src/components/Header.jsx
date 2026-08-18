@@ -1,6 +1,6 @@
 import React from 'react';
 import { Flame, Calendar, Search, Github, Key, Sparkles, Filter } from 'lucide-react';
-import { getAvailableDates } from '../services/mockDataGenerator';
+import { getAvailableDates } from '../services/demoData';
 
 export default function Header({ 
   selectedDate, 
