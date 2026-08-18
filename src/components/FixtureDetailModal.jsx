@@ -98,6 +98,45 @@ export default function FixtureDetailModal({ fixture, metrics, onClose }) {
             </div>
           </div>
 
+          {/* Settled result, graded against what the model actually said */}
+          {metrics.settlement && (
+            <div style={{
+              background: 'rgba(0,0,0,0.3)',
+              border: `1px solid ${metrics.settlement.color}`,
+              borderRadius: 'var(--radius-md)',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem'
+            }}>
+              {metrics.settlement.won ? <CheckCircle size={20} color={metrics.settlement.color} />
+                : <AlertTriangle size={20} color={metrics.settlement.color} />}
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                <strong style={{ color: metrics.settlement.color }}>
+                  Full time {metrics.settlement.scoreText} - {metrics.settlement.badgeText}
+                </strong>
+                <div style={{ marginTop: '0.2rem' }}>
+                  {metrics.settlement.predictedYes === null
+                    ? 'This fixture was never scored, so the result is recorded but not graded.'
+                    : `Model called BTTS ${metrics.settlement.predictedYes ? 'YES' : 'NO'}; the match finished BTTS ${metrics.settlement.actualBTTS ? 'YES' : 'NO'}.`}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {metrics.settlementPending && (
+            <div style={{
+              background: 'rgba(0,0,0,0.3)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-md)',
+              padding: '0.85rem 1.25rem',
+              fontSize: '0.85rem',
+              color: 'var(--text-muted)'
+            }}>
+              This match has finished but no scoreline has been reported yet, so it is left ungraded.
+            </div>
+          )}
+
           {/* Kalshi Direct Market Link Banner */}
           <div style={{
             background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.12), rgba(0, 245, 155, 0.08))',

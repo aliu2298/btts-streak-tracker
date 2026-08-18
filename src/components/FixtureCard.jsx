@@ -67,9 +67,27 @@ export default function FixtureCard({ fixture, metrics, onSelectFixture }) {
           <span className={`badge-${metrics.tier.toLowerCase()}`}>
             {metrics.badgeText}
           </span>
-          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', background: 'rgba(0,0,0,0.3)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
-            ⏰ {fixture.time}
-          </span>
+          {metrics.settlement ? (
+            <span style={{
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              color: metrics.settlement.color,
+              border: `1px solid ${metrics.settlement.color}`,
+              background: 'rgba(0,0,0,0.3)',
+              padding: '0.2rem 0.5rem',
+              borderRadius: '9999px'
+            }}>
+              FT {metrics.settlement.scoreText} · {metrics.settlement.badgeText}
+            </span>
+          ) : metrics.settlementPending ? (
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dim)', background: 'rgba(0,0,0,0.3)', padding: '0.2rem 0.5rem', borderRadius: '9999px' }}>
+              Result pending
+            </span>
+          ) : (
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', background: 'rgba(0,0,0,0.3)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+              ⏰ {fixture.time}
+            </span>
+          )}
         </div>
       </div>
 
