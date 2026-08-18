@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Flame, ShieldAlert, Award, Calculator, TrendingUp, CheckCircle, AlertTriangle, Layers, ExternalLink } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { calculateBTTSMetrics, calculateValue } from '../utils/bttsAlgorithm';
+import { calculateBTTSMetrics, calculateValue, getKalshiUrl } from '../utils/bttsAlgorithm';
 
 export default function FixtureDetailModal({ fixture, onClose }) {
   if (!fixture) return null;
@@ -9,7 +9,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
   const metrics = calculateBTTSMetrics(fixture);
   const { homeTeam, awayTeam, h2h = [] } = fixture;
 
-  const kalshiMarketUrl = `https://kalshi.com/category/sports`;
+  const kalshiMarketUrl = getKalshiUrl(fixture);
 
   // Bookmaker odds state
   const defaultOdds = fixture.bookmakerBTTSOdds ? fixture.bookmakerBTTSOdds.yes : '';
@@ -112,7 +112,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                 <TrendingUp size={18} /> Trade this match on Kalshi Prediction Markets
               </span>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                View live sports prediction markets for {homeTeam.name} vs {awayTeam.name}
+                View live orderbooks and market prices for {homeTeam.name} vs {awayTeam.name}
               </p>
             </div>
 
@@ -166,7 +166,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
 
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'block' }}>Expected Goal (15%)</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-main)' }}>{metrics.components.expectedGoal}%</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>{metrics.components.expectedGoal}%</span>
               </div>
 
             </div>

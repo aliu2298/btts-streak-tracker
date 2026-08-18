@@ -1,13 +1,13 @@
 import React from 'react';
 import { Flame, ChevronRight, ShieldAlert, Target, ExternalLink, TrendingUp } from 'lucide-react';
-import { calculateBTTSMetrics } from '../utils/bttsAlgorithm';
+import { calculateBTTSMetrics, getKalshiUrl } from '../utils/bttsAlgorithm';
 
 export default function FixtureCard({ fixture, onSelectFixture }) {
   const metrics = calculateBTTSMetrics(fixture);
   const { homeTeam, awayTeam } = fixture;
 
-  // Kalshi sports prediction markets direct landing page (bulletproof link)
-  const kalshiMarketUrl = `https://kalshi.com/category/sports`;
+  // Exact Kalshi match ticker URL
+  const kalshiMarketUrl = getKalshiUrl(fixture);
 
   return (
     <div className="glass-panel" style={{

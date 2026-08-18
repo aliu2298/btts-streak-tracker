@@ -2,6 +2,52 @@
  * BTTS (Both Teams To Score) Algorithm & Mathematical Analytics Engine
  */
 
+/**
+ * Generates Kalshi exact match market URL matching Kalshi's ticker format:
+ * e.g. https://kalshi.com/markets/kxlaligagame/la-liga-game/kxlaligagame-26aug22esprma
+ */
+export function getKalshiUrl(fixture) {
+  if (!fixture) return 'https://kalshi.com/markets/kxsoccer/soccer-game';
+
+  const { leagueId, homeTeam, awayTeam, date } = fixture;
+
+  let seriesTicker = 'kxsoccer';
+  let seriesSlug = 'soccer-game';
+
+  if (leagueId === 'epl') {
+    seriesTicker = 'kxeplgame';
+    seriesSlug = 'english-premier-league-game';
+  } else if (leagueId === 'laliga') {
+    seriesTicker = 'kxlaligagame';
+    seriesSlug = 'la-liga-game';
+  } else if (leagueId === 'seriea') {
+    seriesTicker = 'kxserieagame';
+    seriesSlug = 'serie-a-game';
+  } else if (leagueId === 'bundesliga') {
+    seriesTicker = 'kxbundesligagame';
+    seriesSlug = 'bundesliga-game';
+  } else if (leagueId === 'ucl') {
+    seriesTicker = 'kxchampionsleague';
+    seriesSlug = 'champions-league-game';
+  }
+
+  if (date && homeTeam?.shortName && awayTeam?.shortName) {
+    const [year, monthNum, day] = date.split('-');
+    const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    const monthStr = monthNames[parseInt(monthNum, 10) - 1] || 'aug';
+    const yr2 = year ? year.slice(-2) : '26';
+    const dateCode = `${yr2}${monthStr}${day || '22'}`;
+
+    const home3 = homeTeam.shortName.toLowerCase().slice(0, 3);
+    const away3 = awayTeam.shortName.toLowerCase().slice(0, 3);
+    const matchTicker = `${seriesTicker}-${dateCode}${home3}${away3}`;
+
+    return `https://kalshi.com/markets/${seriesTicker}/${seriesSlug}/${matchTicker}`;
+  }
+
+  return `https://kalshi.com/markets/${seriesTicker}/${seriesSlug}`;
+}
+
 export function calculateBTTSMetrics(match) {
   const { homeTeam, awayTeam, h2h = [] } = match;
 
