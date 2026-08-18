@@ -1,10 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Flame, ChevronRight, ShieldAlert, Target, ExternalLink, TrendingUp } from 'lucide-react';
-import { calculateBTTSMetrics, getKalshiUrl } from '../utils/bttsAlgorithm';
+import { getKalshiUrl } from '../utils/bttsAlgorithm';
 
-export default function FixtureCard({ fixture, onSelectFixture }) {
-  const metrics = calculateBTTSMetrics(fixture);
+/** Shows the club crest, or the team's initials - never another club's badge. */
+function TeamCrest({ team }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!team.logo || failed) {
+    return (
+      <div style={{
+        width: '48px',
+        height: '48px',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(255,255,255,0.06)',
+        border: '1px solid var(--border-subtle)',
+        fontWeight: 800,
+        fontSize: '0.8rem',
+        color: 'var(--text-muted)'
+      }}>
+        {team.shortName}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={team.logo}
+      alt={team.name}
+      style={{ width: '48px', height: '48px', objectFit: 'contain', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }}
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+export default function FixtureCard({ fixture, metrics, onSelectFixture }) {
   const { homeTeam, awayTeam } = fixture;
+  const hasScore = metrics.score !== null;
 
   // Exact Kalshi match ticker URL
   const kalshiMarketUrl = getKalshiUrl(fixture);
@@ -14,7 +48,7 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
       padding: '1.5rem',
       display: 'flex',
       flexDirection: 'column',
-      justify: 'space-between',
+      justifyContent: 'space-between',
       gap: '1.25rem',
       position: 'relative',
       overflow: 'hidden',
@@ -33,9 +67,27 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
           <span className={`badge-${metrics.tier.toLowerCase()}`}>
             {metrics.badgeText}
           </span>
-          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', background: 'rgba(0,0,0,0.3)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
-            ⏰ {fixture.time}
-          </span>
+          {metrics.settlement ? (
+            <span style={{
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              color: metrics.settlement.color,
+              border: `1px solid ${metrics.settlement.color}`,
+              background: 'rgba(0,0,0,0.3)',
+              padding: '0.2rem 0.5rem',
+              borderRadius: '9999px'
+            }}>
+              FT {metrics.settlement.scoreText} · {metrics.settlement.badgeText}
+            </span>
+          ) : metrics.settlementPending ? (
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dim)', background: 'rgba(0,0,0,0.3)', padding: '0.2rem 0.5rem', borderRadius: '9999px' }}>
+              Result pending
+            </span>
+          ) : (
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', background: 'rgba(0,0,0,0.3)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+              ⏰ {fixture.time}
+            </span>
+          )}
         </div>
       </div>
 
@@ -43,13 +95,8 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '1rem' }}>
         
         {/* Home Team */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textCenter: 'center', gap: '0.5rem' }}>
-          <img 
-            src={homeTeam.logo} 
-            alt={homeTeam.name} 
-            style={{ width: '48px', height: '48px', objectFit: 'contain', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }} 
-            onError={(e) => { e.target.src = 'https://media.api-sports.io/football/teams/42.png'; }}
-          />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '0.5rem' }}>
+          <TeamCrest team={homeTeam} />
           <span style={{ fontWeight: 800, fontSize: '1rem', textAlign: 'center', color: 'var(--text-main)' }}>
             {homeTeam.name}
           </span>
@@ -72,24 +119,19 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
         {/* Center BTTS Score Display */}
         <div className="btts-score-display">
           <div className={`score-circle tier-${metrics.tier}`}>
-            {metrics.score}%
+            {hasScore ? `${metrics.score}%` : '—'}
           </div>
           <span style={{ fontSize: '0.7rem', fontWeight: 800, color: metrics.tierColor, marginTop: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {metrics.tierLabel}
           </span>
           <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '0.1rem' }}>
-            Fair Odds: {metrics.fairOdds}
+            {hasScore ? `Fair Odds: ${metrics.fairOdds}` : 'Not scored'}
           </span>
         </div>
 
         {/* Away Team */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textCenter: 'center', gap: '0.5rem' }}>
-          <img 
-            src={awayTeam.logo} 
-            alt={awayTeam.name} 
-            style={{ width: '48px', height: '48px', objectFit: 'contain', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }} 
-            onError={(e) => { e.target.src = 'https://media.api-sports.io/football/teams/49.png'; }}
-          />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '0.5rem' }}>
+          <TeamCrest team={awayTeam} />
           <span style={{ fontWeight: 800, fontSize: '1rem', textAlign: 'center', color: 'var(--text-main)' }}>
             {awayTeam.name}
           </span>
@@ -132,7 +174,7 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
       {/* Card Action Buttons */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.5rem' }}>
         <button
-          onClick={() => onSelectFixture(fixture)}
+          onClick={() => onSelectFixture({ fixture, metrics })}
           style={{
             padding: '0.7rem',
             borderRadius: 'var(--radius-md)',

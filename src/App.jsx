@@ -6,10 +6,43 @@ import FixtureCard from './components/FixtureCard';
 import FixtureDetailModal from './components/FixtureDetailModal';
 import GitHubGuideModal from './components/GitHubGuideModal';
 import ApiSettingsModal from './components/ApiSettingsModal';
-import { fetchMatches, getStoredApiKey } from './services/apiService';
-import { getAvailableDates } from './services/mockDataGenerator';
-import { calculateBTTSMetrics } from './utils/bttsAlgorithm';
-import { Flame, SlidersHorizontal, ArrowUpDown, RefreshCw, AlertCircle } from 'lucide-react';
+import { fetchMatches } from './services/apiService';
+import { getAvailableDates } from './services/demoData';
+import { calculateBTTSMetrics, HIGH_CONFIDENCE_THRESHOLD } from './utils/bttsAlgorithm';
+import { Flame, ArrowUpDown, RefreshCw, AlertCircle, Info } from 'lucide-react';
+
+function DataSourceBanner({ source, warnings }) {
+  const isDemo = source === 'demo';
+  if (!isDemo && warnings.length === 0) return null;
+
+  const accent = isDemo ? 'var(--accent-amber)' : 'var(--text-dim)';
+  return (
+    <div
+      className="glass-panel"
+      style={{
+        padding: '0.85rem 1.1rem',
+        marginBottom: '1.5rem',
+        borderRadius: 'var(--radius-md)',
+        borderLeft: `4px solid ${accent}`,
+        display: 'flex',
+        gap: '0.75rem',
+        alignItems: 'flex-start'
+      }}
+    >
+      <Info size={18} color={accent} style={{ flexShrink: 0, marginTop: '0.1rem' }} />
+      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+        {isDemo && (
+          <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.2rem' }}>
+            Demo data - these fixtures and stats are a bundled sample, not live results.
+          </strong>
+        )}
+        {warnings.map((w, i) => (
+          <div key={i} style={{ marginTop: i === 0 ? 0 : '0.25rem' }}>{w}</div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const dates = getAvailableDates();
@@ -21,31 +54,43 @@ export default function App() {
   const [highBttsOnly, setHighBttsOnly] = useState(false);
   const [sortBy, setSortBy] = useState('score_desc'); // score_desc | time_asc | streak_desc
 
-  const [fixtures, setFixtures] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedFixture, setSelectedFixture] = useState(null);
-  
+  const [reloadToken, setReloadToken] = useState(0);
+
   const [showGitHubModal, setShowGitHubModal] = useState(false);
   const [showApiModal, setShowApiModal] = useState(false);
-  const [hasApiKey, setHasApiKey] = useState(!!getStoredApiKey());
 
-  // Load Fixtures on date change
-  const loadData = async () => {
-    setIsLoading(true);
-    setHasApiKey(!!getStoredApiKey());
-    try {
-      const data = await fetchMatches(selectedDate);
-      setFixtures(data);
-    } catch (err) {
-      console.error('Failed to load match fixtures:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // One piece of state for the whole board, tagged with the request it came
+  // from. Loading is derived rather than set, and a response for a date the
+  // user has already navigated away from is discarded instead of overwriting
+  // the newer one.
+  const boardKey = `${selectedDate}#${reloadToken}`;
+  const [board, setBoard] = useState({ key: null, fixtures: [], source: 'demo', warnings: [] });
+  const isLoading = board.key !== boardKey;
 
   useEffect(() => {
-    loadData();
-  }, [selectedDate]);
+    let cancelled = false;
+
+    fetchMatches(selectedDate)
+      .then(({ fixtures, source, warnings }) => {
+        if (!cancelled) setBoard({ key: boardKey, fixtures, source, warnings: warnings || [] });
+      })
+      .catch(err => {
+        console.error('Failed to load match fixtures:', err);
+        if (!cancelled) {
+          setBoard({
+            key: boardKey,
+            fixtures: [],
+            source: 'demo',
+            warnings: [`Could not load fixtures: ${err.message}`]
+          });
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [selectedDate, boardKey]);
+
+  const { fixtures, source: dataSource, warnings } = board;
 
   // Compute metrics for each fixture & compute league counts
   const processedFixtures = useMemo(() => {
@@ -72,7 +117,7 @@ export default function App() {
         return false;
       }
       // High BTTS filter (>70%)
-      if (highBttsOnly && metrics.score < 70) {
+      if (highBttsOnly && (metrics.score === null || metrics.score < HIGH_CONFIDENCE_THRESHOLD)) {
         return false;
       }
       // Search query
@@ -86,12 +131,16 @@ export default function App() {
       return true;
     }).sort((a, b) => {
       if (sortBy === 'score_desc') {
+        // Unscored fixtures (no form data) always sort last.
+        if (a.metrics.score === null || b.metrics.score === null) {
+          return (a.metrics.score === null ? 1 : 0) - (b.metrics.score === null ? 1 : 0);
+        }
         return b.metrics.score - a.metrics.score;
       } else if (sortBy === 'time_asc') {
         return a.fixture.time.localeCompare(b.fixture.time);
       } else if (sortBy === 'streak_desc') {
-        const streakA = Math.max(a.metrics.homeScoreStreak, a.metrics.awayScoreStreak);
-        const streakB = Math.max(b.metrics.homeScoreStreak, b.metrics.awayScoreStreak);
+        const streakA = Math.max(a.metrics.homeScoreStreak || 0, a.metrics.awayScoreStreak || 0);
+        const streakB = Math.max(b.metrics.homeScoreStreak || 0, b.metrics.awayScoreStreak || 0);
         return streakB - streakA;
       }
       return 0;
@@ -111,8 +160,11 @@ export default function App() {
         onToggleHighBtts={() => setHighBttsOnly(prev => !prev)}
         onOpenGitHubModal={() => setShowGitHubModal(true)}
         onOpenApiModal={() => setShowApiModal(true)}
-        hasApiKey={hasApiKey}
+        dataSource={dataSource}
       />
+
+      {/* Honest banner: what the numbers below are actually built from */}
+      <DataSourceBanner source={dataSource} warnings={warnings} />
 
       {/* Top KPI Metrics Banner */}
       <StatsBanner fixtures={fixtures} metricsList={processedFixtures} />
@@ -179,10 +231,11 @@ export default function App() {
           gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
           gap: '1.25rem'
         }}>
-          {filteredMetricsList.map(({ fixture }) => (
+          {filteredMetricsList.map(({ fixture, metrics }) => (
             <FixtureCard
               key={fixture.id}
               fixture={fixture}
+              metrics={metrics}
               onSelectFixture={setSelectedFixture}
             />
           ))}
@@ -242,7 +295,8 @@ export default function App() {
       {/* Modals */}
       {selectedFixture && (
         <FixtureDetailModal
-          fixture={selectedFixture}
+          fixture={selectedFixture.fixture}
+          metrics={selectedFixture.metrics}
           onClose={() => setSelectedFixture(null)}
         />
       )}
@@ -256,7 +310,7 @@ export default function App() {
       {showApiModal && (
         <ApiSettingsModal
           onClose={() => setShowApiModal(false)}
-          onReloadData={loadData}
+          onReloadData={() => setReloadToken(t => t + 1)}
         />
       )}
 

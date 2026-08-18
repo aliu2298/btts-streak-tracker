@@ -265,3 +265,33 @@ input, select {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
+
+/* Spinner used by the loading state (no utility CSS framework in this project) */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Fixtures we could not score because form data was unavailable */
+.badge-unknown {
+  background: rgba(100, 116, 139, 0.15);
+  border: 1px solid var(--text-dim);
+  color: var(--text-dim);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-transform: uppercase;
+}
+
+.score-circle.tier-UNKNOWN {
+  border-color: var(--text-dim);
+  color: var(--text-dim);
+}

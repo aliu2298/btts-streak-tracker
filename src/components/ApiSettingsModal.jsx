@@ -82,9 +82,10 @@ export default function ApiSettingsModal({ onClose, onReloadData }) {
           <div style={{ background: 'rgba(0, 245, 155, 0.08)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--accent-emerald)', fontSize: '0.85rem', color: 'var(--text-main)', display: 'flex', gap: '0.75rem' }}>
             <Info size={20} color="var(--accent-emerald)" style={{ flexShrink: 0 }} />
             <div>
-              <strong>Built-in Offline Engine Active!</strong>
+              <strong>Without a token you get demo data</strong>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.2rem' }}>
-                By default, this app generates realistic next-day fixtures with comprehensive scoring streak data. You do NOT need an API key to host or use this app on GitHub Pages!
+                The app ships with a small sample of fixtures and results so it runs anywhere,
+                including GitHub Pages. Those are illustrative only - not real upcoming matches.
               </p>
             </div>
           </div>
@@ -109,8 +110,15 @@ export default function ApiSettingsModal({ onClose, onReloadData }) {
                 outline: 'none'
               }}
             />
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '0.35rem', display: 'block' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '0.35rem', display: 'block', lineHeight: 1.6 }}>
               Free tokens can be obtained at <a href="https://www.football-data.org/" target="_blank" rel="noreferrer" style={{ color: 'var(--accent-cyan)' }}>football-data.org</a>.
+              <br />
+              With a token, streaks, goal rates and head-to-head records are computed from
+              real finished matches. Two caveats: the free tier allows 10 requests/minute, so
+              only the first few fixtures of a load get form data (cached for 6 hours); and
+              football-data.org sends no CORS headers, so a purely static deployment may be
+              blocked by the browser and fall back to demo data. The banner on the board
+              always says which one you are looking at.
             </span>
           </div>
 

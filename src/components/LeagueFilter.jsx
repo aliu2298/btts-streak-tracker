@@ -1,5 +1,5 @@
 import React from 'react';
-import { LEAGUES } from '../services/mockDataGenerator';
+import { LEAGUES } from '../services/demoData';
 
 export default function LeagueFilter({ selectedLeague, onSelectLeague, leagueCounts = {} }) {
   return (

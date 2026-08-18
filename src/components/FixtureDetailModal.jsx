@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
-import { X, Flame, ShieldAlert, Award, Calculator, TrendingUp, CheckCircle, AlertTriangle, Layers, ExternalLink } from 'lucide-react';
+import { X, Flame, Calculator, TrendingUp, CheckCircle, AlertTriangle, Layers, ExternalLink } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { calculateBTTSMetrics, calculateValue, getKalshiUrl } from '../utils/bttsAlgorithm';
+import { calculateValue, getKalshiUrl } from '../utils/bttsAlgorithm';
 
-export default function FixtureDetailModal({ fixture, onClose }) {
-  if (!fixture) return null;
+export default function FixtureDetailModal({ fixture, metrics, onClose }) {
+  // Hooks must run unconditionally - an early return above useState made the
+  // hook order depend on props, which React forbids.
+  const [userOdds, setUserOdds] = useState(fixture?.bookmakerBTTSOdds?.yes ?? '');
 
-  const metrics = calculateBTTSMetrics(fixture);
-  const { homeTeam, awayTeam, h2h = [] } = fixture;
+  if (!fixture || !metrics) return null;
+
+  const { homeTeam, awayTeam } = fixture;
+  const hasScore = metrics.score !== null;
+  const pct = (v) => (v === null || v === undefined ? '—' : `${v}%`);
 
   const kalshiMarketUrl = getKalshiUrl(fixture);
-
-  // Bookmaker odds state
-  const defaultOdds = fixture.bookmakerBTTSOdds ? fixture.bookmakerBTTSOdds.yes : '';
-  const [userOdds, setUserOdds] = useState(defaultOdds);
   
   const valueResult = calculateValue(metrics.score, parseFloat(userOdds));
 
@@ -83,17 +84,58 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                 {metrics.badgeText}
               </span>
               <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                {metrics.score}% BTTS Probability
+                {hasScore ? `${metrics.score}% BTTS Probability` : 'Not enough data to score'}
               </h3>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                Fair Market Odds: <strong style={{ color: 'var(--text-main)' }}>{metrics.fairOdds}</strong>
+                {hasScore
+                  ? <>Fair Market Odds: <strong style={{ color: 'var(--text-main)' }}>{metrics.fairOdds}</strong></>
+                  : metrics.dataNote}
               </p>
             </div>
             
             <div className={`score-circle tier-${metrics.tier}`} style={{ width: '80px', height: '80px', fontSize: '1.5rem' }}>
-              {metrics.score}%
+              {hasScore ? `${metrics.score}%` : '—'}
             </div>
           </div>
+
+          {/* Settled result, graded against what the model actually said */}
+          {metrics.settlement && (
+            <div style={{
+              background: 'rgba(0,0,0,0.3)',
+              border: `1px solid ${metrics.settlement.color}`,
+              borderRadius: 'var(--radius-md)',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem'
+            }}>
+              {metrics.settlement.won ? <CheckCircle size={20} color={metrics.settlement.color} />
+                : <AlertTriangle size={20} color={metrics.settlement.color} />}
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                <strong style={{ color: metrics.settlement.color }}>
+                  Full time {metrics.settlement.scoreText} - {metrics.settlement.badgeText}
+                </strong>
+                <div style={{ marginTop: '0.2rem' }}>
+                  {metrics.settlement.predictedYes === null
+                    ? 'This fixture was never scored, so the result is recorded but not graded.'
+                    : `Model called BTTS ${metrics.settlement.predictedYes ? 'YES' : 'NO'}; the match finished BTTS ${metrics.settlement.actualBTTS ? 'YES' : 'NO'}.`}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {metrics.settlementPending && (
+            <div style={{
+              background: 'rgba(0,0,0,0.3)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-md)',
+              padding: '0.85rem 1.25rem',
+              fontSize: '0.85rem',
+              color: 'var(--text-muted)'
+            }}>
+              This match has finished but no scoreline has been reported yet, so it is left ungraded.
+            </div>
+          )}
 
           {/* Kalshi Direct Market Link Banner */}
           <div style={{
@@ -151,22 +193,22 @@ export default function FixtureDetailModal({ fixture, onClose }) {
               
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'block' }}>Streak Synergy (40%)</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>{metrics.components.streakSynergy}%</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>{pct(metrics.components.streakSynergy)}</span>
               </div>
 
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'block' }}>Recent Form (30%)</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>{metrics.components.recentForm}%</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>{pct(metrics.components.recentForm)}</span>
               </div>
 
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'block' }}>H2H History (15%)</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-amber)' }}>{metrics.components.h2h}%</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-amber)' }}>{pct(metrics.components.h2h)}</span>
               </div>
 
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'block' }}>Expected Goal (15%)</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>{metrics.components.expectedGoal}%</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>{pct(metrics.components.expectedGoal)}</span>
               </div>
 
             </div>
@@ -197,7 +239,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                 {homeTeam.name} (Recent)
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                {homeTeam.recentMatches.map((m, i) => (
+                {(homeTeam.recentMatches || []).map((m, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', padding: '0.25rem 0.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '4px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>vs {m.opponent}</span>
                     <span style={{ fontWeight: 700, color: m.btts ? 'var(--accent-emerald)' : 'var(--text-dim)' }}>
@@ -205,6 +247,11 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                     </span>
                   </div>
                 ))}
+                {(homeTeam.recentMatches || []).length === 0 && (
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
+                    No recent results available.
+                  </span>
+                )}
               </div>
             </div>
 
@@ -214,7 +261,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                 {awayTeam.name} (Recent)
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                {awayTeam.recentMatches.map((m, i) => (
+                {(awayTeam.recentMatches || []).map((m, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', padding: '0.25rem 0.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '4px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>vs {m.opponent}</span>
                     <span style={{ fontWeight: 700, color: m.btts ? 'var(--accent-emerald)' : 'var(--text-dim)' }}>
@@ -222,6 +269,11 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                     </span>
                   </div>
                 ))}
+                {(awayTeam.recentMatches || []).length === 0 && (
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
+                    No recent results available.
+                  </span>
+                )}
               </div>
             </div>
 
@@ -273,7 +325,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                           <CheckCircle size={16} /> +{valueResult.valueMargin}% Expected Value Bet!
                         </span>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          Market Implied Prob: {valueResult.impliedBookieProb}% vs Model: {metrics.score}%
+                          Market Implied Prob: {valueResult.impliedBookieProb}% vs Model: {pct(metrics.score)}
                         </span>
                       </div>
                       <button 
@@ -289,7 +341,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                         <AlertTriangle size={16} /> No Value (-{valueResult.valueMargin}% Margin)
                       </span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        Market implied probability ({valueResult.impliedBookieProb}%) is higher than model prediction ({metrics.score}%).
+                        Market implied probability ({valueResult.impliedBookieProb}%) is higher than model prediction ({pct(metrics.score)}).
                       </span>
                     </div>
                   )

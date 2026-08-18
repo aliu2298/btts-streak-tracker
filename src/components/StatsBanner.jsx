@@ -10,18 +10,26 @@ export default function StatsBanner({ fixtures = [], metricsList = [] }) {
   let highStreakCount = 0;
   let totalScoreSum = 0;
 
+  let scoredCount = 0;
+
   metricsList.forEach(({ fixture, metrics }) => {
-    totalScoreSum += metrics.score;
-    if (metrics.score > topScore) {
-      topScore = metrics.score;
-      topPick = { fixture, metrics };
+    // Fixtures with no usable form data are excluded from the averages
+    // rather than counted as zero.
+    if (metrics.score !== null) {
+      scoredCount++;
+      totalScoreSum += metrics.score;
+      if (metrics.score > topScore) {
+        topScore = metrics.score;
+        topPick = { fixture, metrics };
+      }
     }
     if (metrics.homeScoreStreak >= 5 || metrics.awayScoreStreak >= 5 || metrics.homeConcedeStreak >= 5 || metrics.awayConcedeStreak >= 5) {
       highStreakCount++;
     }
   });
 
-  const avgBtts = totalFixtures > 0 ? Math.round(totalScoreSum / totalFixtures) : 0;
+  const avgBtts = scoredCount > 0 ? Math.round(totalScoreSum / scoredCount) : 0;
+  const unscoredCount = totalFixtures - scoredCount;
 
   return (
     <div style={{
@@ -108,8 +116,13 @@ export default function StatsBanner({ fixtures = [], metricsList = [] }) {
             Average BTTS Score
           </span>
           <span style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)' }}>
-            {avgBtts}%
+            {scoredCount > 0 ? `${avgBtts}%` : '—'}
           </span>
+          {unscoredCount > 0 && (
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', display: 'block' }}>
+              {unscoredCount} fixture{unscoredCount === 1 ? '' : 's'} unscored (no form data)
+            </span>
+          )}
         </div>
       </div>
 
