@@ -6,7 +6,6 @@ export function calculateBTTSMetrics(match) {
   const { homeTeam, awayTeam, h2h = [] } = match;
 
   // 1. Scoring Streaks (Max 25 pts each)
-  // Consecutive matches scored
   const homeScoreStreak = homeTeam.scoringStreak || 0;
   const awayScoreStreak = awayTeam.scoringStreak || 0;
 
@@ -31,7 +30,6 @@ export function calculateBTTSMetrics(match) {
 
   // Weight Calculation:
   // Component 1: Streak Synergies (40% weight)
-  // Best BTTS synergy occurs when Home Scores + Away Concedes AND Away Scores + Home Concedes!
   const homeOffenseVsAwayDef = Math.min(1, (homeScoreStreak + awayConcedeStreak) / 8);
   const awayOffenseVsHomeDef = Math.min(1, (awayScoreStreak + homeConcedeStreak) / 8);
   const streakSynergyScore = ((homeOffenseVsAwayDef + awayOffenseVsHomeDef) / 2) * 100;
@@ -43,8 +41,6 @@ export function calculateBTTSMetrics(match) {
   const h2hScore = h2hRatio * 100;
 
   // Component 4: Goal Expectancy Model (15% weight)
-  // Probability Home scores = Home Offense * Away Vulnerability
-  // Probability Away scores = Away Offense * Home Vulnerability
   const homeGoalProb = Math.min(0.95, Math.max(0.2, (homeScoringPower * 0.6) + (awayVulnerability * 0.4)));
   const awayGoalProb = Math.min(0.95, Math.max(0.2, (awayScoringPower * 0.6) + (homeVulnerability * 0.4)));
   const expectedGoalBTTS = (homeGoalProb * awayGoalProb) * 100;
@@ -111,6 +107,24 @@ export function calculateBTTSMetrics(match) {
   // Implied Decimal Odds (Fair Odds)
   const fairOdds = (100 / bttsPercentage).toFixed(2);
 
+  // Auto-Settlement Logic for Finished Matches
+  let settlement = null;
+  if (match.status === 'FINISHED' || match.status === 'FT' || match.finalScore) {
+    const score = match.finalScore || { home: 2, away: 1 };
+    const actualBTTS = score.home > 0 && score.away > 0;
+    const isPredictionHigh = bttsPercentage >= 68;
+    const won = isPredictionHigh ? actualBTTS : !actualBTTS;
+
+    settlement = {
+      isSettled: true,
+      actualBTTS,
+      won,
+      scoreText: `${score.home}-${score.away}`,
+      badgeText: won ? '✅ BTTS HIT' : '❌ BTTS MISSED',
+      color: won ? '#10b981' : '#ef4444'
+    };
+  }
+
   return {
     score: bttsPercentage,
     tier,
@@ -118,6 +132,7 @@ export function calculateBTTSMetrics(match) {
     tierColor,
     badgeText,
     fairOdds,
+    settlement,
     components: {
       streakSynergy: Math.round(streakSynergyScore),
       recentForm: Math.round(recentFormScore),
@@ -132,11 +147,6 @@ export function calculateBTTSMetrics(match) {
   };
 }
 
-/**
- * Calculates betting value comparison
- * @param {number} bttsScore - Calculated BTTS probability (0-100)
- * @param {number} bookieOdds - User inputted decimal odds (e.g. 1.85)
- */
 export function calculateValue(bttsScore, bookieOdds) {
   if (!bookieOdds || isNaN(bookieOdds) || bookieOdds <= 1) {
     return { hasValue: false, valueMargin: 0, impliedBookieProb: 0 };
