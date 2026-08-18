@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Github, Copy, Check, ExternalLink, Terminal, Globe, Rocket } from 'lucide-react';
+import { X, Github, Copy, Check, Terminal, Globe, Rocket } from 'lucide-react';
 
 export default function GitHubGuideModal({ onClose }) {
   const [copiedStep, setCopiedStep] = useState(null);
@@ -143,7 +143,7 @@ git push -u origin main`;
               <ol style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                 <li>Go to <strong>Settings</strong> tab → <strong>Pages</strong> (on left sidebar).</li>
                 <li>Under <strong>Build and deployment</strong> → <strong>Source</strong>, select <strong>GitHub Actions</strong>.</li>
-                <li>That's it! The included <code>.github/workflows/deploy.yml</code> workflow will automatically build and publish your app every time you push code!</li>
+                <li>That&apos;s it! The included <code>.github/workflows/deploy.yml</code> workflow will automatically build and publish your app every time you push code!</li>
               </ol>
               <div style={{ marginTop: '0.5rem', padding: '0.6rem 0.85rem', background: 'rgba(0, 240, 255, 0.1)', border: '1px solid var(--accent-cyan)', borderRadius: 'var(--radius-sm)', color: 'var(--accent-cyan)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Globe size={16} />

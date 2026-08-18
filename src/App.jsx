@@ -54,35 +54,43 @@ export default function App() {
   const [highBttsOnly, setHighBttsOnly] = useState(false);
   const [sortBy, setSortBy] = useState('score_desc'); // score_desc | time_asc | streak_desc
 
-  const [fixtures, setFixtures] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedFixture, setSelectedFixture] = useState(null);
-  const [dataSource, setDataSource] = useState('demo');
-  const [warnings, setWarnings] = useState([]);
+  const [reloadToken, setReloadToken] = useState(0);
 
   const [showGitHubModal, setShowGitHubModal] = useState(false);
   const [showApiModal, setShowApiModal] = useState(false);
 
-  // Load Fixtures on date change
-  const loadData = async () => {
-    setIsLoading(true);
-    try {
-      const { fixtures: data, source, warnings: notes } = await fetchMatches(selectedDate);
-      setFixtures(data);
-      setDataSource(source);
-      setWarnings(notes || []);
-    } catch (err) {
-      console.error('Failed to load match fixtures:', err);
-      setFixtures([]);
-      setWarnings([`Could not load fixtures: ${err.message}`]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // One piece of state for the whole board, tagged with the request it came
+  // from. Loading is derived rather than set, and a response for a date the
+  // user has already navigated away from is discarded instead of overwriting
+  // the newer one.
+  const boardKey = `${selectedDate}#${reloadToken}`;
+  const [board, setBoard] = useState({ key: null, fixtures: [], source: 'demo', warnings: [] });
+  const isLoading = board.key !== boardKey;
 
   useEffect(() => {
-    loadData();
-  }, [selectedDate]);
+    let cancelled = false;
+
+    fetchMatches(selectedDate)
+      .then(({ fixtures, source, warnings }) => {
+        if (!cancelled) setBoard({ key: boardKey, fixtures, source, warnings: warnings || [] });
+      })
+      .catch(err => {
+        console.error('Failed to load match fixtures:', err);
+        if (!cancelled) {
+          setBoard({
+            key: boardKey,
+            fixtures: [],
+            source: 'demo',
+            warnings: [`Could not load fixtures: ${err.message}`]
+          });
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [selectedDate, boardKey]);
+
+  const { fixtures, source: dataSource, warnings } = board;
 
   // Compute metrics for each fixture & compute league counts
   const processedFixtures = useMemo(() => {
@@ -302,7 +310,7 @@ export default function App() {
       {showApiModal && (
         <ApiSettingsModal
           onClose={() => setShowApiModal(false)}
-          onReloadData={loadData}
+          onReloadData={() => setReloadToken(t => t + 1)}
         />
       )}
 

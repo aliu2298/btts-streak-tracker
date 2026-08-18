@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import { X, Flame, ShieldAlert, Award, Calculator, TrendingUp, CheckCircle, AlertTriangle, Layers, ExternalLink } from 'lucide-react';
+import { X, Flame, Calculator, TrendingUp, CheckCircle, AlertTriangle, Layers, ExternalLink } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { calculateValue, getKalshiUrl } from '../utils/bttsAlgorithm';
 
 export default function FixtureDetailModal({ fixture, metrics, onClose }) {
+  // Hooks must run unconditionally - an early return above useState made the
+  // hook order depend on props, which React forbids.
+  const [userOdds, setUserOdds] = useState(fixture?.bookmakerBTTSOdds?.yes ?? '');
+
   if (!fixture || !metrics) return null;
 
-  const { homeTeam, awayTeam, h2h = [] } = fixture;
+  const { homeTeam, awayTeam } = fixture;
   const hasScore = metrics.score !== null;
   const pct = (v) => (v === null || v === undefined ? '—' : `${v}%`);
 
   const kalshiMarketUrl = getKalshiUrl(fixture);
-
-  // Bookmaker odds state
-  const defaultOdds = fixture.bookmakerBTTSOdds ? fixture.bookmakerBTTSOdds.yes : '';
-  const [userOdds, setUserOdds] = useState(defaultOdds);
   
   const valueResult = calculateValue(metrics.score, parseFloat(userOdds));
 

@@ -80,7 +80,7 @@ async function apiGet(path, apiKey) {
   let res;
   try {
     res = await fetch(`${API_BASE}${path}`, { headers: { 'X-Auth-Token': apiKey } });
-  } catch (err) {
+  } catch {
     // A network-level throw from fetch is almost always the browser refusing
     // the request: football-data.org does not send CORS headers, so a static
     // page cannot call it directly.
@@ -109,6 +109,12 @@ async function apiGet(path, apiKey) {
 function fullTime(match) {
   const ft = match?.score?.fullTime;
   if (!ft) return null;
+  // The provider reports nulls for matches that have not been played.
+  // Number(null) is 0, so coercing first would read an unplayed fixture as a
+  // genuine 0-0 - and a 0-0 settles as BTTS NO.
+  if (ft.home === null || ft.home === undefined || ft.away === null || ft.away === undefined) {
+    return null;
+  }
   const home = Number(ft.home);
   const away = Number(ft.away);
   if (!Number.isFinite(home) || !Number.isFinite(away)) return null;
