@@ -8,7 +8,7 @@ import GitHubGuideModal from './components/GitHubGuideModal';
 import ApiSettingsModal from './components/ApiSettingsModal';
 import { fetchMatches, getStoredApiKey } from './services/apiService';
 import { getAvailableDates } from './services/mockDataGenerator';
-import { calculateBTTSMetrics } from './utils/bttsAlgorithm';
+import { calculateBTTSMetrics, HIGH_CONFIDENCE_THRESHOLD } from './utils/bttsAlgorithm';
 import { Flame, SlidersHorizontal, ArrowUpDown, RefreshCw, AlertCircle } from 'lucide-react';
 
 export default function App() {
@@ -72,7 +72,7 @@ export default function App() {
         return false;
       }
       // High BTTS filter (>70%)
-      if (highBttsOnly && metrics.score < 70) {
+      if (highBttsOnly && (metrics.score === null || metrics.score < HIGH_CONFIDENCE_THRESHOLD)) {
         return false;
       }
       // Search query
@@ -86,12 +86,16 @@ export default function App() {
       return true;
     }).sort((a, b) => {
       if (sortBy === 'score_desc') {
+        // Unscored fixtures (no form data) always sort last.
+        if (a.metrics.score === null || b.metrics.score === null) {
+          return (a.metrics.score === null ? 1 : 0) - (b.metrics.score === null ? 1 : 0);
+        }
         return b.metrics.score - a.metrics.score;
       } else if (sortBy === 'time_asc') {
         return a.fixture.time.localeCompare(b.fixture.time);
       } else if (sortBy === 'streak_desc') {
-        const streakA = Math.max(a.metrics.homeScoreStreak, a.metrics.awayScoreStreak);
-        const streakB = Math.max(b.metrics.homeScoreStreak, b.metrics.awayScoreStreak);
+        const streakA = Math.max(a.metrics.homeScoreStreak || 0, a.metrics.awayScoreStreak || 0);
+        const streakB = Math.max(b.metrics.homeScoreStreak || 0, b.metrics.awayScoreStreak || 0);
         return streakB - streakA;
       }
       return 0;
@@ -179,10 +183,11 @@ export default function App() {
           gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
           gap: '1.25rem'
         }}>
-          {filteredMetricsList.map(({ fixture }) => (
+          {filteredMetricsList.map(({ fixture, metrics }) => (
             <FixtureCard
               key={fixture.id}
               fixture={fixture}
+              metrics={metrics}
               onSelectFixture={setSelectedFixture}
             />
           ))}
@@ -242,7 +247,8 @@ export default function App() {
       {/* Modals */}
       {selectedFixture && (
         <FixtureDetailModal
-          fixture={selectedFixture}
+          fixture={selectedFixture.fixture}
+          metrics={selectedFixture.metrics}
           onClose={() => setSelectedFixture(null)}
         />
       )}

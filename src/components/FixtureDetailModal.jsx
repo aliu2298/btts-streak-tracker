@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { X, Flame, ShieldAlert, Award, Calculator, TrendingUp, CheckCircle, AlertTriangle, Layers, ExternalLink } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { calculateBTTSMetrics, calculateValue, getKalshiUrl } from '../utils/bttsAlgorithm';
+import { calculateValue, getKalshiUrl } from '../utils/bttsAlgorithm';
 
-export default function FixtureDetailModal({ fixture, onClose }) {
-  if (!fixture) return null;
+export default function FixtureDetailModal({ fixture, metrics, onClose }) {
+  if (!fixture || !metrics) return null;
 
-  const metrics = calculateBTTSMetrics(fixture);
   const { homeTeam, awayTeam, h2h = [] } = fixture;
+  const hasScore = metrics.score !== null;
+  const pct = (v) => (v === null || v === undefined ? '—' : `${v}%`);
 
   const kalshiMarketUrl = getKalshiUrl(fixture);
 
@@ -83,15 +84,17 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                 {metrics.badgeText}
               </span>
               <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                {metrics.score}% BTTS Probability
+                {hasScore ? `${metrics.score}% BTTS Probability` : 'Not enough data to score'}
               </h3>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                Fair Market Odds: <strong style={{ color: 'var(--text-main)' }}>{metrics.fairOdds}</strong>
+                {hasScore
+                  ? <>Fair Market Odds: <strong style={{ color: 'var(--text-main)' }}>{metrics.fairOdds}</strong></>
+                  : metrics.dataNote}
               </p>
             </div>
             
             <div className={`score-circle tier-${metrics.tier}`} style={{ width: '80px', height: '80px', fontSize: '1.5rem' }}>
-              {metrics.score}%
+              {hasScore ? `${metrics.score}%` : '—'}
             </div>
           </div>
 
@@ -151,22 +154,22 @@ export default function FixtureDetailModal({ fixture, onClose }) {
               
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'block' }}>Streak Synergy (40%)</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>{metrics.components.streakSynergy}%</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-emerald)' }}>{pct(metrics.components.streakSynergy)}</span>
               </div>
 
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'block' }}>Recent Form (30%)</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>{metrics.components.recentForm}%</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>{pct(metrics.components.recentForm)}</span>
               </div>
 
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'block' }}>H2H History (15%)</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-amber)' }}>{metrics.components.h2h}%</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-amber)' }}>{pct(metrics.components.h2h)}</span>
               </div>
 
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'block' }}>Expected Goal (15%)</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>{metrics.components.expectedGoal}%</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>{pct(metrics.components.expectedGoal)}</span>
               </div>
 
             </div>
@@ -273,7 +276,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                           <CheckCircle size={16} /> +{valueResult.valueMargin}% Expected Value Bet!
                         </span>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          Market Implied Prob: {valueResult.impliedBookieProb}% vs Model: {metrics.score}%
+                          Market Implied Prob: {valueResult.impliedBookieProb}% vs Model: {pct(metrics.score)}
                         </span>
                       </div>
                       <button 
@@ -289,7 +292,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                         <AlertTriangle size={16} /> No Value (-{valueResult.valueMargin}% Margin)
                       </span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        Market implied probability ({valueResult.impliedBookieProb}%) is higher than model prediction ({metrics.score}%).
+                        Market implied probability ({valueResult.impliedBookieProb}%) is higher than model prediction ({pct(metrics.score)}).
                       </span>
                     </div>
                   )

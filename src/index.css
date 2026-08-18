@@ -275,3 +275,23 @@ input, select {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* Fixtures we could not score because form data was unavailable */
+.badge-unknown {
+  background: rgba(100, 116, 139, 0.15);
+  border: 1px solid var(--text-dim);
+  color: var(--text-dim);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-transform: uppercase;
+}
+
+.score-circle.tier-UNKNOWN {
+  border-color: var(--text-dim);
+  color: var(--text-dim);
+}

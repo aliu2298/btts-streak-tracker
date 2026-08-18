@@ -1,10 +1,10 @@
 import React from 'react';
 import { Flame, ChevronRight, ShieldAlert, Target, ExternalLink, TrendingUp } from 'lucide-react';
-import { calculateBTTSMetrics, getKalshiUrl } from '../utils/bttsAlgorithm';
+import { getKalshiUrl } from '../utils/bttsAlgorithm';
 
-export default function FixtureCard({ fixture, onSelectFixture }) {
-  const metrics = calculateBTTSMetrics(fixture);
+export default function FixtureCard({ fixture, metrics, onSelectFixture }) {
   const { homeTeam, awayTeam } = fixture;
+  const hasScore = metrics.score !== null;
 
   // Exact Kalshi match ticker URL
   const kalshiMarketUrl = getKalshiUrl(fixture);
@@ -72,13 +72,13 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
         {/* Center BTTS Score Display */}
         <div className="btts-score-display">
           <div className={`score-circle tier-${metrics.tier}`}>
-            {metrics.score}%
+            {hasScore ? `${metrics.score}%` : '—'}
           </div>
           <span style={{ fontSize: '0.7rem', fontWeight: 800, color: metrics.tierColor, marginTop: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {metrics.tierLabel}
           </span>
           <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '0.1rem' }}>
-            Fair Odds: {metrics.fairOdds}
+            {hasScore ? `Fair Odds: ${metrics.fairOdds}` : 'Not scored'}
           </span>
         </div>
 
@@ -132,7 +132,7 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
       {/* Card Action Buttons */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.5rem' }}>
         <button
-          onClick={() => onSelectFixture(fixture)}
+          onClick={() => onSelectFixture({ fixture, metrics })}
           style={{
             padding: '0.7rem',
             borderRadius: 'var(--radius-md)',
