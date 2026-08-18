@@ -6,7 +6,8 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
   const metrics = calculateBTTSMetrics(fixture);
   const { homeTeam, awayTeam } = fixture;
 
-  const kalshiMarketUrl = `https://kalshi.com/markets?query=${encodeURIComponent(homeTeam.name + ' ' + awayTeam.name)}`;
+  // Kalshi sports prediction markets direct link
+  const kalshiMarketUrl = `https://kalshi.com/category/sports?search=${encodeURIComponent(homeTeam.name)}`;
 
   return (
     <div className="glass-panel" style={{

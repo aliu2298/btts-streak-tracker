@@ -9,7 +9,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
   const metrics = calculateBTTSMetrics(fixture);
   const { homeTeam, awayTeam, h2h = [] } = fixture;
 
-  const kalshiMarketUrl = `https://kalshi.com/markets?query=${encodeURIComponent(homeTeam.name + ' ' + awayTeam.name)}`;
+  const kalshiMarketUrl = `https://kalshi.com/category/sports?search=${encodeURIComponent(homeTeam.name)}`;
 
   // Bookmaker odds state
   const defaultOdds = fixture.bookmakerBTTSOdds ? fixture.bookmakerBTTSOdds.yes : '';
@@ -56,7 +56,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
               background: 'rgba(255,255,255,0.05)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              justify.content: 'center',
               color: 'var(--text-muted)'
             }}
           >
@@ -112,7 +112,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                 <TrendingUp size={18} /> Trade this match on Kalshi Prediction Markets
               </span>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                View live orderbooks and market prices for {homeTeam.name} vs {awayTeam.name}
+                View live orderbooks and sports markets for {homeTeam.name} vs {awayTeam.name}
               </p>
             </div>
 
