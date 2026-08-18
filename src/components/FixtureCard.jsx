@@ -14,7 +14,7 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
       padding: '1.5rem',
       display: 'flex',
       flexDirection: 'column',
-      justify: 'space-between',
+      justifyContent: 'space-between',
       gap: '1.25rem',
       position: 'relative',
       overflow: 'hidden',
@@ -43,7 +43,7 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '1rem' }}>
         
         {/* Home Team */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textCenter: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '0.5rem' }}>
           <img 
             src={homeTeam.logo} 
             alt={homeTeam.name} 
@@ -83,7 +83,7 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
         </div>
 
         {/* Away Team */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textCenter: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '0.5rem' }}>
           <img 
             src={awayTeam.logo} 
             alt={awayTeam.name} 
