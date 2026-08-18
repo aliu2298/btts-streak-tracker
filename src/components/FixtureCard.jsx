@@ -1,10 +1,12 @@
 import React from 'react';
-import { Flame, ChevronRight, ShieldAlert, Target, Award } from 'lucide-react';
+import { Flame, ChevronRight, ShieldAlert, Target, ExternalLink, TrendingUp } from 'lucide-react';
 import { calculateBTTSMetrics } from '../utils/bttsAlgorithm';
 
 export default function FixtureCard({ fixture, onSelectFixture }) {
   const metrics = calculateBTTSMetrics(fixture);
   const { homeTeam, awayTeam } = fixture;
+
+  const kalshiMarketUrl = `https://kalshi.com/markets?query=${encodeURIComponent(homeTeam.name + ' ' + awayTeam.name)}`;
 
   return (
     <div className="glass-panel" style={{
@@ -126,36 +128,63 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
         </span>
       </div>
 
-      {/* Card Action Button */}
-      <button
-        onClick={() => onSelectFixture(fixture)}
-        style={{
-          width: '100%',
-          padding: '0.7rem',
-          borderRadius: 'var(--radius-md)',
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))',
-          border: '1px solid var(--border-subtle)',
-          color: 'var(--text-main)',
-          fontSize: '0.85rem',
-          fontWeight: 700,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.4rem',
-          transition: 'all 0.2s'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = 'var(--accent-emerald)';
-          e.currentTarget.style.color = 'var(--accent-emerald)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = 'var(--border-subtle)';
-          e.currentTarget.style.color = 'var(--text-main)';
-        }}
-      >
-        <span>Analyze Streak Breakdown & Value</span>
-        <ChevronRight size={16} />
-      </button>
+      {/* Card Action Buttons */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.5rem' }}>
+        <button
+          onClick={() => onSelectFixture(fixture)}
+          style={{
+            padding: '0.7rem',
+            borderRadius: 'var(--radius-md)',
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))',
+            border: '1px solid var(--border-subtle)',
+            color: 'var(--text-main)',
+            fontSize: '0.825rem',
+            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.4rem',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'var(--accent-emerald)';
+            e.currentTarget.style.color = 'var(--accent-emerald)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'var(--border-subtle)';
+            e.currentTarget.style.color = 'var(--text-main)';
+          }}
+        >
+          <span>Analyze Breakdown</span>
+          <ChevronRight size={16} />
+        </button>
+
+        <a
+          href={kalshiMarketUrl}
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            padding: '0.7rem 0.85rem',
+            borderRadius: 'var(--radius-md)',
+            background: 'rgba(0, 240, 255, 0.12)',
+            border: '1px solid var(--accent-cyan)',
+            color: 'var(--accent-cyan)',
+            fontSize: '0.8rem',
+            fontWeight: 800,
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+            boxShadow: '0 0 10px rgba(0, 240, 255, 0.15)'
+          }}
+          title="Trade or view prediction market on Kalshi"
+        >
+          <TrendingUp size={15} />
+          <span>Kalshi</span>
+          <ExternalLink size={13} />
+        </a>
+      </div>
 
     </div>
   );

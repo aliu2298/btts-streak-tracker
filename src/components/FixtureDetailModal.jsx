@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Flame, ShieldAlert, Award, Calculator, TrendingUp, CheckCircle, AlertTriangle, Layers } from 'lucide-react';
+import { X, Flame, ShieldAlert, Award, Calculator, TrendingUp, CheckCircle, AlertTriangle, Layers, ExternalLink } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { calculateBTTSMetrics, calculateValue } from '../utils/bttsAlgorithm';
 
@@ -8,6 +8,8 @@ export default function FixtureDetailModal({ fixture, onClose }) {
 
   const metrics = calculateBTTSMetrics(fixture);
   const { homeTeam, awayTeam, h2h = [] } = fixture;
+
+  const kalshiMarketUrl = `https://kalshi.com/markets?query=${encodeURIComponent(homeTeam.name + ' ' + awayTeam.name)}`;
 
   // Bookmaker odds state
   const defaultOdds = fixture.bookmakerBTTSOdds ? fixture.bookmakerBTTSOdds.yes : '';
@@ -91,6 +93,51 @@ export default function FixtureDetailModal({ fixture, onClose }) {
             <div className={`score-circle tier-${metrics.tier}`} style={{ width: '80px', height: '80px', fontSize: '1.5rem' }}>
               {metrics.score}%
             </div>
+          </div>
+
+          {/* Kalshi Direct Market Link Banner */}
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.12), rgba(0, 245, 155, 0.08))',
+            border: '1px solid var(--accent-cyan)',
+            borderRadius: 'var(--radius-md)',
+            padding: '1rem 1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1rem',
+            boxShadow: '0 0 15px rgba(0, 240, 255, 0.15)'
+          }}>
+            <div>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <TrendingUp size={18} /> Trade this match on Kalshi Prediction Markets
+              </span>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                View live orderbooks and market prices for {homeTeam.name} vs {awayTeam.name}
+              </p>
+            </div>
+
+            <a
+              href={kalshiMarketUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.6rem 1.1rem',
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--accent-cyan)',
+                color: '#000',
+                fontWeight: 800,
+                fontSize: '0.85rem',
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+                boxShadow: '0 0 12px rgba(0, 240, 255, 0.3)'
+              }}
+            >
+              <span>View on Kalshi</span>
+              <ExternalLink size={15} />
+            </a>
           </div>
 
           {/* Component Score Breakdown */}
@@ -189,13 +236,13 @@ export default function FixtureDetailModal({ fixture, onClose }) {
           }}>
             <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--accent-cyan)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <Calculator size={18} />
-              Bookmaker Odds Value Calculator
+              Bookmaker / Kalshi Odds Value Calculator
             </h4>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
               <div style={{ flexGrow: 1 }}>
                 <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>
-                  Enter Bookmaker Odds for BTTS YES:
+                  Enter Odds / Implied Price for BTTS YES:
                 </label>
                 <input
                   type="number"
@@ -226,7 +273,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                           <CheckCircle size={16} /> +{valueResult.valueMargin}% Expected Value Bet!
                         </span>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          Implied Bookie Prob: {valueResult.impliedBookieProb}% vs Model: {metrics.score}%
+                          Market Implied Prob: {valueResult.impliedBookieProb}% vs Model: {metrics.score}%
                         </span>
                       </div>
                       <button 
@@ -242,7 +289,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                         <AlertTriangle size={16} /> No Value (-{valueResult.valueMargin}% Margin)
                       </span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        Bookmaker implied probability ({valueResult.impliedBookieProb}%) is higher than model prediction ({metrics.score}%).
+                        Market implied probability ({valueResult.impliedBookieProb}%) is higher than model prediction ({metrics.score}%).
                       </span>
                     </div>
                   )
