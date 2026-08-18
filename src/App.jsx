@@ -6,10 +6,43 @@ import FixtureCard from './components/FixtureCard';
 import FixtureDetailModal from './components/FixtureDetailModal';
 import GitHubGuideModal from './components/GitHubGuideModal';
 import ApiSettingsModal from './components/ApiSettingsModal';
-import { fetchMatches, getStoredApiKey } from './services/apiService';
+import { fetchMatches } from './services/apiService';
 import { getAvailableDates } from './services/mockDataGenerator';
 import { calculateBTTSMetrics, HIGH_CONFIDENCE_THRESHOLD } from './utils/bttsAlgorithm';
-import { Flame, SlidersHorizontal, ArrowUpDown, RefreshCw, AlertCircle } from 'lucide-react';
+import { Flame, ArrowUpDown, RefreshCw, AlertCircle, Info } from 'lucide-react';
+
+function DataSourceBanner({ source, warnings }) {
+  const isDemo = source === 'demo';
+  if (!isDemo && warnings.length === 0) return null;
+
+  const accent = isDemo ? 'var(--accent-amber)' : 'var(--text-dim)';
+  return (
+    <div
+      className="glass-panel"
+      style={{
+        padding: '0.85rem 1.1rem',
+        marginBottom: '1.5rem',
+        borderRadius: 'var(--radius-md)',
+        borderLeft: `4px solid ${accent}`,
+        display: 'flex',
+        gap: '0.75rem',
+        alignItems: 'flex-start'
+      }}
+    >
+      <Info size={18} color={accent} style={{ flexShrink: 0, marginTop: '0.1rem' }} />
+      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+        {isDemo && (
+          <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.2rem' }}>
+            Demo data - these fixtures and stats are a bundled sample, not live results.
+          </strong>
+        )}
+        {warnings.map((w, i) => (
+          <div key={i} style={{ marginTop: i === 0 ? 0 : '0.25rem' }}>{w}</div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const dates = getAvailableDates();
@@ -24,20 +57,24 @@ export default function App() {
   const [fixtures, setFixtures] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedFixture, setSelectedFixture] = useState(null);
-  
+  const [dataSource, setDataSource] = useState('demo');
+  const [warnings, setWarnings] = useState([]);
+
   const [showGitHubModal, setShowGitHubModal] = useState(false);
   const [showApiModal, setShowApiModal] = useState(false);
-  const [hasApiKey, setHasApiKey] = useState(!!getStoredApiKey());
 
   // Load Fixtures on date change
   const loadData = async () => {
     setIsLoading(true);
-    setHasApiKey(!!getStoredApiKey());
     try {
-      const data = await fetchMatches(selectedDate);
+      const { fixtures: data, source, warnings: notes } = await fetchMatches(selectedDate);
       setFixtures(data);
+      setDataSource(source);
+      setWarnings(notes || []);
     } catch (err) {
       console.error('Failed to load match fixtures:', err);
+      setFixtures([]);
+      setWarnings([`Could not load fixtures: ${err.message}`]);
     } finally {
       setIsLoading(false);
     }
@@ -115,8 +152,11 @@ export default function App() {
         onToggleHighBtts={() => setHighBttsOnly(prev => !prev)}
         onOpenGitHubModal={() => setShowGitHubModal(true)}
         onOpenApiModal={() => setShowApiModal(true)}
-        hasApiKey={hasApiKey}
+        dataSource={dataSource}
       />
+
+      {/* Honest banner: what the numbers below are actually built from */}
+      <DataSourceBanner source={dataSource} warnings={warnings} />
 
       {/* Top KPI Metrics Banner */}
       <StatsBanner fixtures={fixtures} metricsList={processedFixtures} />

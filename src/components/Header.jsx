@@ -11,8 +11,9 @@ export default function Header({
   onToggleHighBtts,
   onOpenGitHubModal,
   onOpenApiModal,
-  hasApiKey
+  dataSource
 }) {
+  const isLive = dataSource === 'live';
   const dates = getAvailableDates();
 
   return (
@@ -58,16 +59,16 @@ export default function Header({
                 gap: '0.5rem',
                 padding: '0.5rem 0.85rem',
                 borderRadius: 'var(--radius-md)',
-                background: hasApiKey ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                border: `1px solid ${hasApiKey ? 'var(--accent-emerald)' : 'var(--border-subtle)'}`,
-                color: hasApiKey ? 'var(--accent-emerald)' : 'var(--text-muted)',
+                background: isLive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.12)',
+                border: `1px solid ${isLive ? 'var(--accent-emerald)' : 'var(--accent-amber)'}`,
+                color: isLive ? 'var(--accent-emerald)' : 'var(--accent-amber)',
                 fontSize: '0.85rem',
                 fontWeight: 600,
                 transition: 'all 0.2s'
               }}
             >
               <Key size={16} />
-              {hasApiKey ? 'Live API Active' : 'API Key Setup'}
+              {isLive ? 'Live data' : 'Demo data'}
             </button>
 
             <button

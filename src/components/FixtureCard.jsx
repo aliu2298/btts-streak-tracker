@@ -1,6 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Flame, ChevronRight, ShieldAlert, Target, ExternalLink, TrendingUp } from 'lucide-react';
 import { getKalshiUrl } from '../utils/bttsAlgorithm';
+
+/** Shows the club crest, or the team's initials - never another club's badge. */
+function TeamCrest({ team }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!team.logo || failed) {
+    return (
+      <div style={{
+        width: '48px',
+        height: '48px',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(255,255,255,0.06)',
+        border: '1px solid var(--border-subtle)',
+        fontWeight: 800,
+        fontSize: '0.8rem',
+        color: 'var(--text-muted)'
+      }}>
+        {team.shortName}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={team.logo}
+      alt={team.name}
+      style={{ width: '48px', height: '48px', objectFit: 'contain', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }}
+      onError={() => setFailed(true)}
+    />
+  );
+}
 
 export default function FixtureCard({ fixture, metrics, onSelectFixture }) {
   const { homeTeam, awayTeam } = fixture;
@@ -44,12 +78,7 @@ export default function FixtureCard({ fixture, metrics, onSelectFixture }) {
         
         {/* Home Team */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '0.5rem' }}>
-          <img 
-            src={homeTeam.logo} 
-            alt={homeTeam.name} 
-            style={{ width: '48px', height: '48px', objectFit: 'contain', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }} 
-            onError={(e) => { e.target.src = 'https://media.api-sports.io/football/teams/42.png'; }}
-          />
+          <TeamCrest team={homeTeam} />
           <span style={{ fontWeight: 800, fontSize: '1rem', textAlign: 'center', color: 'var(--text-main)' }}>
             {homeTeam.name}
           </span>
@@ -84,12 +113,7 @@ export default function FixtureCard({ fixture, metrics, onSelectFixture }) {
 
         {/* Away Team */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '0.5rem' }}>
-          <img 
-            src={awayTeam.logo} 
-            alt={awayTeam.name} 
-            style={{ width: '48px', height: '48px', objectFit: 'contain', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }} 
-            onError={(e) => { e.target.src = 'https://media.api-sports.io/football/teams/49.png'; }}
-          />
+          <TeamCrest team={awayTeam} />
           <span style={{ fontWeight: 800, fontSize: '1rem', textAlign: 'center', color: 'var(--text-main)' }}>
             {awayTeam.name}
           </span>
