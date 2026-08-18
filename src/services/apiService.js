@@ -18,6 +18,23 @@ export function clearApiKey() {
 }
 
 /**
+ * Maps Football-Data.org competition codes to UI league filter IDs
+ */
+function mapCompetitionToLeagueId(code) {
+  if (!code) return 'all';
+  const c = code.toUpperCase();
+  switch (c) {
+    case 'PL': return 'epl';
+    case 'PD': return 'laliga';
+    case 'SA': return 'seriea';
+    case 'BL1': return 'bundesliga';
+    case 'CL': return 'ucl';
+    case 'MLS': return 'mls';
+    default: return 'all';
+  }
+}
+
+/**
  * Fetch matches for target date.
  * If API Key is present, attempts real API fetch; falls back to dynamic generator.
  */
@@ -47,20 +64,22 @@ export async function fetchMatches(dateStr) {
 
 function transformApiMatches(apiMatches) {
   return apiMatches.map(m => {
-    // Generate deterministic streak stats from API match ID for consistency
     const seed = m.id || 100;
     const homeScoreStreak = (seed % 6) + 3;
     const homeConcedeStreak = (seed % 5) + 2;
     const awayScoreStreak = ((seed + 2) % 6) + 2;
     const awayConcedeStreak = ((seed + 1) % 5) + 3;
 
+    const compCode = m.competition?.code;
+    const leagueId = mapCompetitionToLeagueId(compCode);
+
     return {
       id: `api-${m.id}`,
       date: m.utcDate.split('T')[0],
       time: new Date(m.utcDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
       status: m.status,
-      leagueId: m.competition.code ? m.competition.code.toLowerCase() : 'other',
-      leagueName: m.competition.name || 'International',
+      leagueId,
+      leagueName: m.competition?.name || 'International Soccer',
       homeTeam: {
         id: m.homeTeam.id,
         name: m.homeTeam.name,
