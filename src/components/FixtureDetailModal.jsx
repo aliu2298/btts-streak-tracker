@@ -151,10 +151,10 @@ export default function FixtureDetailModal({ fixture, metrics, onClose }) {
           }}>
             <div>
               <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <TrendingUp size={18} /> Trade this match on Kalshi Prediction Markets
+                <TrendingUp size={18} /> Trade Both Teams to Score on Kalshi
               </span>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                View live orderbooks and market prices for {homeTeam.name} vs {awayTeam.name}
+                {`Opens Kalshi's BTTS market for this competition${fixture.kalshiTicker ? '' : ' - pick the match from there'}`}
               </p>
             </div>
 
@@ -177,7 +177,7 @@ export default function FixtureDetailModal({ fixture, metrics, onClose }) {
                 boxShadow: '0 0 12px rgba(0, 240, 255, 0.3)'
               }}
             >
-              <span>View on Kalshi</span>
+              <span>View BTTS market</span>
               <ExternalLink size={15} />
             </a>
           </div>

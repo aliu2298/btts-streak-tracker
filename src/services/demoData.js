@@ -310,7 +310,6 @@ export function getDemoFixtures() {
       leagueId: 'laliga', leagueName: 'La Liga',
       home: 'rma', away: 'vil',
       h2h: h2h(['2025-10-05', 2, 1], ['2025-05-19', 4, 4], ['2024-12-17', 4, 0]),
-      kalshiTicker: 'kxlaligagame-26aug22esprma',
       bookmakerBTTSOdds: { yes: 1.62, no: 2.20 }
     },
     {

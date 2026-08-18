@@ -4,6 +4,7 @@ import {
   calculateValue,
   getKalshiUrl,
   readFinalScore,
+  KALSHI_BTTS_SERIES,
   HIGH_CONFIDENCE_THRESHOLD
 } from './bttsAlgorithm';
 
@@ -138,14 +139,52 @@ describe('calculateValue', () => {
 });
 
 describe('getKalshiUrl', () => {
-  it('uses the exact market when a ticker is known', () => {
-    expect(getKalshiUrl({ leagueId: 'laliga', kalshiTicker: 'kxlaligagame-26aug22esprma' }))
-      .toBe('https://kalshi.com/markets/kxlaligagame/la-liga-game/kxlaligagame-26aug22esprma');
+  // Every ticker asserted here was checked against Kalshi's public series
+  // list; the app models BTTS, so it must link to the BTTS series and not
+  // the match-winner one.
+  it('links each league to its BTTS series, not the match-winner series', () => {
+    const expected = {
+      epl: 'kxeplbtts',
+      laliga: 'kxlaligabtts',
+      seriea: 'kxserieabtts',
+      bundesliga: 'kxbundesligabtts',
+      ucl: 'kxuclbtts',
+      mls: 'kxmlsbtts'
+    };
+    Object.entries(expected).forEach(([leagueId, ticker]) => {
+      expect(getKalshiUrl({ leagueId })).toBe(`https://kalshi.com/markets/${ticker}`);
+    });
   });
 
-  it('falls back to the league hub, then the sports category', () => {
-    expect(getKalshiUrl({ leagueId: 'epl' }))
-      .toBe('https://kalshi.com/markets/kxeplgame/english-premier-league-game');
-    expect(getKalshiUrl(null)).toBe('https://kalshi.com/category/sports');
+  it('never emits a match-winner series', () => {
+    const urls = [...Object.keys(KALSHI_BTTS_SERIES), 'all', undefined]
+      .map(leagueId => getKalshiUrl({ leagueId }));
+    urls.forEach(u => expect(u).not.toMatch(/game/));
+    Object.keys(KALSHI_BTTS_SERIES).forEach(leagueId => {
+      expect(getKalshiUrl({ leagueId })).toMatch(/btts/);
+    });
+  });
+
+  it('sends unmapped competitions to the soccer browse page', () => {
+    // KXSOCCER and KXCHAMPIONSLEAGUE, used previously, do not exist, and
+    // KXSOCCERBTTS has no open events, so its page renders empty.
+    expect(getKalshiUrl({ leagueId: 'all' })).toBe('https://kalshi.com/category/soccer');
+    expect(getKalshiUrl({ leagueId: 'ligue1' })).toBe('https://kalshi.com/category/soccer');
+    expect(getKalshiUrl(null)).toBe('https://kalshi.com/category/soccer');
+  });
+
+  it('links straight to a known event, with the ticker as the third segment', () => {
+    expect(getKalshiUrl({ leagueId: 'epl', kalshiTicker: 'KXEPLBTTS-26AUG22HULMUN' }))
+      .toBe('https://kalshi.com/markets/kxeplbtts/epl-both-teams-to-score/kxeplbtts-26aug22hulmun');
+  });
+
+  it('ignores an event ticker from a different series instead of linking to a dead market', () => {
+    // The shape the demo data actually carried.
+    expect(getKalshiUrl({ leagueId: 'laliga', kalshiTicker: 'kxlaligagame-26aug22esprma' }))
+      .toBe('https://kalshi.com/markets/kxlaligabtts');
+    expect(getKalshiUrl({ leagueId: 'epl', kalshiTicker: 'KXMLSBTTS-26AUG19CINNYC' }))
+      .toBe('https://kalshi.com/markets/kxeplbtts');
+    expect(getKalshiUrl({ leagueId: 'epl', kalshiTicker: '   ' }))
+      .toBe('https://kalshi.com/markets/kxeplbtts');
   });
 });
