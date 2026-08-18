@@ -221,10 +221,10 @@ export default function FixtureCard({ fixture, metrics, onSelectFixture }) {
             transition: 'all 0.2s',
             boxShadow: '0 0 10px rgba(0, 240, 255, 0.15)'
           }}
-          title="Trade on Kalshi Sports Market"
+          title="Trade Both Teams to Score on Kalshi"
         >
           <TrendingUp size={15} />
-          <span>Kalshi</span>
+          <span>BTTS</span>
           <ExternalLink size={13} />
         </a>
       </div>

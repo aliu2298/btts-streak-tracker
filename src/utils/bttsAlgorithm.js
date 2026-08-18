@@ -23,41 +23,58 @@ const TIERS = {
 };
 
 /**
- * Generates Kalshi exact match market URL or League Hub URL:
- * e.g. https://kalshi.com/markets/kxlaligagame/la-liga-game/kxlaligagame-26aug22esprma
+ * Kalshi's Both Teams To Score series, one per league.
+ *
+ * This app models BTTS, so it must link to the BTTS market. It previously
+ * linked to the match-winner series (KXEPLGAME and friends), and two of the
+ * tickers it used - KXCHAMPIONSLEAGUE and KXSOCCER - are not real series at
+ * all. Every ticker below was checked against Kalshi's public series list.
+ *
+ * The slug segment is cosmetic: Kalshi resolves the market from the series
+ * and event tickers and ignores the text in between. It is kept only so the
+ * URL reads sensibly, and it is never load-bearing.
+ */
+export const KALSHI_BTTS_SERIES = {
+  epl: { ticker: 'kxeplbtts', slug: 'epl-both-teams-to-score' },
+  laliga: { ticker: 'kxlaligabtts', slug: 'la-liga-btts' },
+  seriea: { ticker: 'kxserieabtts', slug: 'serie-a-btts' },
+  bundesliga: { ticker: 'kxbundesligabtts', slug: 'bundesliga-btts' },
+  ucl: { ticker: 'kxuclbtts', slug: 'champions-league-btts' },
+  mls: { ticker: 'kxmlsbtts', slug: 'mls-btts' }
+};
+
+/**
+ * Where unmapped competitions go. Kalshi's cross-competition KXSOCCERBTTS
+ * series exists but currently carries no open events, so its page renders
+ * empty; the soccer browse page is the useful landing spot instead.
+ */
+export const KALSHI_SOCCER_BROWSE = 'https://kalshi.com/category/soccer';
+
+/**
+ * Builds the Kalshi BTTS market URL for a fixture.
+ *
+ * With a known Kalshi event ticker (e.g. KXEPLBTTS-26AUG22HULMUN) this links
+ * straight to that match. Otherwise it links to the league's BTTS series,
+ * which opens on the next event in that series.
+ *
+ * A fixture's `kalshiTicker` must belong to the league's series; a ticker
+ * from a different series is ignored rather than turned into a dead link.
+ * That mismatch is not hypothetical - the demo data carried a
+ * `kxlaligagame-...` ticker, from a series this app should never link to.
  */
 export function getKalshiUrl(fixture) {
-  if (!fixture) return 'https://kalshi.com/category/sports';
+  const series = KALSHI_BTTS_SERIES[fixture?.leagueId];
+  if (!series) return KALSHI_SOCCER_BROWSE;
 
-  const { leagueId, kalshiTicker } = fixture;
+  const hub = `https://kalshi.com/markets/${series.ticker}`;
 
-  let seriesTicker = 'kxsoccer';
-  let seriesSlug = 'soccer-game';
+  const eventTicker = String(fixture?.kalshiTicker || '').trim().toLowerCase();
+  if (!eventTicker) return hub;
 
-  if (leagueId === 'epl') {
-    seriesTicker = 'kxeplgame';
-    seriesSlug = 'english-premier-league-game';
-  } else if (leagueId === 'laliga') {
-    seriesTicker = 'kxlaligagame';
-    seriesSlug = 'la-liga-game';
-  } else if (leagueId === 'seriea') {
-    seriesTicker = 'kxserieagame';
-    seriesSlug = 'serie-a-game';
-  } else if (leagueId === 'bundesliga') {
-    seriesTicker = 'kxbundesligagame';
-    seriesSlug = 'bundesliga-game';
-  } else if (leagueId === 'ucl') {
-    seriesTicker = 'kxchampionsleague';
-    seriesSlug = 'champions-league-game';
-  }
+  // The event ticker is the series ticker plus a match suffix.
+  if (!eventTicker.startsWith(`${series.ticker}-`)) return hub;
 
-  // 1. If explicit active Kalshi ticker is set
-  if (kalshiTicker) {
-    return `https://kalshi.com/markets/${seriesTicker}/${seriesSlug}/${kalshiTicker}`;
-  }
-
-  // 2. Direct Kalshi League Market Hub (Guaranteed 100% no 404!)
-  return `https://kalshi.com/markets/${seriesTicker}/${seriesSlug}`;
+  return `${hub}/${series.slug}/${eventTicker}`;
 }
 
 /** Coerce to a finite number, or null. Never substitutes a made-up default. */
