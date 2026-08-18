@@ -6,8 +6,8 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
   const metrics = calculateBTTSMetrics(fixture);
   const { homeTeam, awayTeam } = fixture;
 
-  // Kalshi sports prediction markets direct link
-  const kalshiMarketUrl = `https://kalshi.com/category/sports?search=${encodeURIComponent(homeTeam.name)}`;
+  // Kalshi sports prediction markets direct landing page (bulletproof link)
+  const kalshiMarketUrl = `https://kalshi.com/category/sports`;
 
   return (
     <div className="glass-panel" style={{
@@ -179,7 +179,7 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
             transition: 'all 0.2s',
             boxShadow: '0 0 10px rgba(0, 240, 255, 0.15)'
           }}
-          title="Trade or view prediction market on Kalshi"
+          title="Trade on Kalshi Sports Market"
         >
           <TrendingUp size={15} />
           <span>Kalshi</span>

@@ -9,7 +9,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
   const metrics = calculateBTTSMetrics(fixture);
   const { homeTeam, awayTeam, h2h = [] } = fixture;
 
-  const kalshiMarketUrl = `https://kalshi.com/category/sports?search=${encodeURIComponent(homeTeam.name)}`;
+  const kalshiMarketUrl = `https://kalshi.com/category/sports`;
 
   // Bookmaker odds state
   const defaultOdds = fixture.bookmakerBTTSOdds ? fixture.bookmakerBTTSOdds.yes : '';
@@ -56,7 +56,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
               background: 'rgba(255,255,255,0.05)',
               display: 'flex',
               alignItems: 'center',
-              justify.content: 'center',
+              justifyContent: 'center',
               color: 'var(--text-muted)'
             }}
           >
@@ -112,7 +112,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
                 <TrendingUp size={18} /> Trade this match on Kalshi Prediction Markets
               </span>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                View live orderbooks and sports markets for {homeTeam.name} vs {awayTeam.name}
+                View live sports prediction markets for {homeTeam.name} vs {awayTeam.name}
               </p>
             </div>
 
@@ -166,7 +166,7 @@ export default function FixtureDetailModal({ fixture, onClose }) {
 
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'block' }}>Expected Goal (15%)</span>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>{metrics.components.expectedGoal}%</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-main)' }}>{metrics.components.expectedGoal}%</span>
               </div>
 
             </div>
