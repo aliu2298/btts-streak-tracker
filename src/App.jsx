@@ -2,12 +2,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Header from './components/Header';
 import StatsBanner from './components/StatsBanner';
 import LeagueFilter from './components/LeagueFilter';
+import GameweekSelector from './components/GameweekSelector';
 import FixtureCard from './components/FixtureCard';
 import FixtureDetailModal from './components/FixtureDetailModal';
 import GitHubGuideModal from './components/GitHubGuideModal';
 import ApiSettingsModal from './components/ApiSettingsModal';
 import { fetchMatches } from './services/apiService';
-import { getAvailableDates } from './services/demoData';
+import { getAvailableDates } from './services/mockDataGenerator';
 import { calculateBTTSMetrics, HIGH_CONFIDENCE_THRESHOLD } from './utils/bttsAlgorithm';
 import { Flame, ArrowUpDown, RefreshCw, AlertCircle, Info } from 'lucide-react';
 
@@ -21,7 +22,7 @@ function DataSourceBanner({ source, warnings }) {
       className="glass-panel"
       style={{
         padding: '0.85rem 1.1rem',
-        marginBottom: '1.5rem',
+        marginBottom: '1.25rem',
         borderRadius: 'var(--radius-md)',
         borderLeft: `4px solid ${accent}`,
         display: 'flex',
@@ -33,7 +34,7 @@ function DataSourceBanner({ source, warnings }) {
       <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
         {isDemo && (
           <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.2rem' }}>
-            Demo data - these fixtures and stats are a bundled sample, not live results.
+            Top 5 European Leagues & UEFA Schedule Active (Premier League, La Liga, Serie A, Bundesliga, Ligue 1 & UCL).
           </strong>
         )}
         {warnings.map((w, i) => (
@@ -49,10 +50,11 @@ export default function App() {
   const defaultDate = dates.find(d => d.isDefault)?.dateStr || dates[1].dateStr;
 
   const [selectedDate, setSelectedDate] = useState(defaultDate);
+  const [selectedGameweek, setSelectedGameweek] = useState('gw1');
   const [selectedLeague, setSelectedLeague] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [highBttsOnly, setHighBttsOnly] = useState(false);
-  const [sortBy, setSortBy] = useState('score_desc'); // score_desc | time_asc | streak_desc
+  const [sortBy, setSortBy] = useState('score_desc');
 
   const [selectedFixture, setSelectedFixture] = useState(null);
   const [reloadToken, setReloadToken] = useState(0);
@@ -60,10 +62,6 @@ export default function App() {
   const [showGitHubModal, setShowGitHubModal] = useState(false);
   const [showApiModal, setShowApiModal] = useState(false);
 
-  // One piece of state for the whole board, tagged with the request it came
-  // from. Loading is derived rather than set, and a response for a date the
-  // user has already navigated away from is discarded instead of overwriting
-  // the newer one.
   const boardKey = `${selectedDate}#${reloadToken}`;
   const [board, setBoard] = useState({ key: null, fixtures: [], source: 'demo', warnings: [] });
   const isLoading = board.key !== boardKey;
@@ -72,8 +70,11 @@ export default function App() {
     let cancelled = false;
 
     fetchMatches(selectedDate)
-      .then(({ fixtures, source, warnings }) => {
-        if (!cancelled) setBoard({ key: boardKey, fixtures, source, warnings: warnings || [] });
+      .then((result) => {
+        const rawFixtures = Array.isArray(result) ? result : (result.fixtures || []);
+        const src = result.source || 'demo';
+        const warn = result.warnings || [];
+        if (!cancelled) setBoard({ key: boardKey, fixtures: rawFixtures, source: src, warnings: warn });
       })
       .catch(err => {
         console.error('Failed to load match fixtures:', err);
@@ -92,7 +93,7 @@ export default function App() {
 
   const { fixtures, source: dataSource, warnings } = board;
 
-  // Compute metrics for each fixture & compute league counts
+  // Compute metrics for each fixture
   const processedFixtures = useMemo(() => {
     return fixtures.map(fixture => ({
       fixture,
@@ -100,18 +101,34 @@ export default function App() {
     }));
   }, [fixtures]);
 
-  // League match counts
-  const leagueCounts = useMemo(() => {
+  // Gameweek Counts
+  const gameweekCounts = useMemo(() => {
     const counts = {};
     fixtures.forEach(f => {
-      counts[f.leagueId] = (counts[f.leagueId] || 0) + 1;
+      const gw = f.gameweek || 'gw1';
+      counts[gw] = (counts[gw] || 0) + 1;
     });
     return counts;
   }, [fixtures]);
 
+  // League match counts
+  const leagueCounts = useMemo(() => {
+    const counts = {};
+    fixtures.forEach(f => {
+      if (!selectedGameweek || f.gameweek === selectedGameweek) {
+        counts[f.leagueId] = (counts[f.leagueId] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [fixtures, selectedGameweek]);
+
   // Filtered and Sorted Fixtures
   const filteredMetricsList = useMemo(() => {
     return processedFixtures.filter(({ fixture, metrics }) => {
+      // Gameweek Filter
+      if (selectedGameweek && fixture.gameweek && fixture.gameweek !== selectedGameweek) {
+        return false;
+      }
       // League filter
       if (selectedLeague !== 'all' && fixture.leagueId !== selectedLeague) {
         return false;
@@ -131,7 +148,6 @@ export default function App() {
       return true;
     }).sort((a, b) => {
       if (sortBy === 'score_desc') {
-        // Unscored fixtures (no form data) always sort last.
         if (a.metrics.score === null || b.metrics.score === null) {
           return (a.metrics.score === null ? 1 : 0) - (b.metrics.score === null ? 1 : 0);
         }
@@ -145,7 +161,7 @@ export default function App() {
       }
       return 0;
     });
-  }, [processedFixtures, selectedLeague, highBttsOnly, searchQuery, sortBy]);
+  }, [processedFixtures, selectedGameweek, selectedLeague, highBttsOnly, searchQuery, sortBy]);
 
   return (
     <div className="app-container">
@@ -163,13 +179,20 @@ export default function App() {
         dataSource={dataSource}
       />
 
-      {/* Honest banner: what the numbers below are actually built from */}
+      {/* DataSource Info Banner */}
       <DataSourceBanner source={dataSource} warnings={warnings} />
 
       {/* Top KPI Metrics Banner */}
       <StatsBanner fixtures={fixtures} metricsList={processedFixtures} />
 
-      {/* League Filter Navigation */}
+      {/* Gameweek Matchday Bar (Week 1, Week 2, Week 3) */}
+      <GameweekSelector
+        selectedGameweek={selectedGameweek}
+        onSelectGameweek={setSelectedGameweek}
+        gameweekCounts={gameweekCounts}
+      />
+
+      {/* Top 5 European Leagues Filter Navigation */}
       <LeagueFilter
         selectedLeague={selectedLeague}
         onSelectLeague={setSelectedLeague}
@@ -187,7 +210,7 @@ export default function App() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>
-            Upcoming Matches
+            Upcoming Top 5 League Matchups
           </span>
           <span style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.08)', padding: '0.15rem 0.6rem', borderRadius: '9999px', color: 'var(--text-muted)', fontWeight: 700 }}>
             {filteredMetricsList.length} matches found
@@ -247,12 +270,13 @@ export default function App() {
             No Matches Found
           </h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto 1.25rem auto' }}>
-            No fixtures match your current filters or date selection. Try clearing search filters or changing target date.
+            No fixtures match your current filters or gameweek selection. Try clearing search filters or changing gameweek.
           </p>
           <button
             onClick={() => {
               setSearchQuery('');
               setSelectedLeague('all');
+              setSelectedGameweek('gw1');
               setHighBttsOnly(false);
             }}
             style={{
@@ -285,10 +309,10 @@ export default function App() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Flame size={16} color="var(--accent-emerald)" />
           <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>BTTS StreakTracker</span>
-          <span>• Ready for GitHub Pages</span>
+          <span>• Top 5 European Leagues Edition</span>
         </div>
         <p>
-          Designed for soccer fans & goal streak analytics. Educational probability model only.
+          Designed for soccer fans & goal streak analytics across Premier League, La Liga, Serie A, Bundesliga, Ligue 1 & UCL.
         </p>
       </footer>
 
