@@ -1,4 +1,4 @@
-import { getDemoFixtures } from './demoData';
+import { generateFixtures } from './mockDataGenerator';
 
 const API_KEY_STORAGE = 'btts_api_key';
 const API_PROVIDER_STORAGE = 'btts_api_provider';
@@ -332,7 +332,6 @@ export async function fetchMatches(dateStr) {
   return { fixtures, source: 'live', warnings };
 }
 
-function demoFixtures(dateStr) {
-  const all = getDemoFixtures();
-  return all.filter(f => f.date === dateStr || !dateStr);
+function demoFixtures() {
+  return generateFixtures();
 }
