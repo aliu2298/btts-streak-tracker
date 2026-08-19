@@ -40,9 +40,7 @@ export const LEAGUES = [
 ];
 
 export function generateFixtures() {
-  const todayStr = getFormattedDate(0);
   const tomorrowStr = getFormattedDate(1);
-  const dayAfterStr = getFormattedDate(2);
 
   return [
     // ========================================================

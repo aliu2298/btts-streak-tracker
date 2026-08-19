@@ -1,6 +1,6 @@
 import React from 'react';
 import { GAMEWEEKS } from '../services/mockDataGenerator';
-import { CalendarRange, Trophy, Flame } from 'lucide-react';
+import { CalendarRange, Flame } from 'lucide-react';
 
 export default function GameweekSelector({ selectedGameweek, onSelectGameweek, gameweekCounts = {} }) {
   return (
