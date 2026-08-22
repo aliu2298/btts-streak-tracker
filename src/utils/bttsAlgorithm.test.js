@@ -125,16 +125,37 @@ describe('calculateBTTSMetrics - settlement', () => {
 });
 
 describe('calculateValue', () => {
-  it('flags a positive edge against the book', () => {
-    const v = calculateValue(70, 1.80); // book implies 55.6%
-    expect(v.hasValue).toBe(true);
-    expect(Number(v.impliedBookieProb)).toBeCloseTo(55.6, 1);
+  it('reports edge in points and expected value as a return, and they differ', () => {
+    const v = calculateValue(71, 1.85);
+    expect(v.isPositive).toBe(true);
+    expect(Number(v.impliedBookieProb)).toBeCloseTo(54.1, 1);
+    expect(Number(v.edgePoints)).toBeCloseTo(16.9, 1);        // 71 - 54.1
+    expect(Number(v.expectedValuePct)).toBeCloseTo(31.3, 1);  // 0.71 * 1.85 - 1
+    // The bug was showing the first number under the second one's name.
+    expect(v.edgePoints).not.toBe(v.expectedValuePct);
   });
 
-  it('returns no value for an unscored fixture or unusable odds', () => {
+  it('agrees with a hand-worked expected value', () => {
+    // 60% at 1.90 returns 0.60 * 1.90 - 1 = +14% per unit staked.
+    expect(Number(calculateValue(60, 1.90).expectedValuePct)).toBeCloseTo(14.0, 1);
+  });
+
+  it('keeps edge and expected value on the same side of zero', () => {
+    for (const p of [20, 40, 50, 55, 71, 90]) {
+      for (const odds of [1.2, 1.4, 1.8, 2.0, 2.5, 5.0]) {
+        const v = calculateValue(p, odds);
+        const trueEV = (p / 100) * odds - 1;
+        expect(v.isPositive, `${p}% @ ${odds}`).toBe(trueEV > 0);
+      }
+    }
+  });
+
+  it('returns nothing usable for an unscored fixture or an impossible price', () => {
     expect(calculateValue(null, 1.8).hasValue).toBe(false);
     expect(calculateValue(70, 1).hasValue).toBe(false);
+    expect(calculateValue(70, 0).hasValue).toBe(false);
     expect(calculateValue(70, undefined).hasValue).toBe(false);
+    expect(calculateValue(70, 'abc').hasValue).toBe(false);
   });
 });
 

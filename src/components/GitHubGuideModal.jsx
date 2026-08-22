@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Github, Copy, Check, Terminal, Globe, Rocket } from 'lucide-react';
+import Modal from './Modal';
 
 export default function GitHubGuideModal({ onClose }) {
   const [copiedStep, setCopiedStep] = useState(null);
@@ -19,8 +20,7 @@ git remote add origin https://github.com/YOUR_GITHUB_USERNAME/btts-streak-tracke
 git push -u origin main`;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '720px' }}>
+    <Modal onClose={onClose} labelledBy="github-guide-title" maxWidth={'720px'}>
         
         {/* Header */}
         <div style={{
@@ -45,7 +45,7 @@ git push -u origin main`;
               <Github size={22} color="var(--accent-emerald)" />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
+              <h2 id="github-guide-title" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
                 Deploy to GitHub Pages
               </h2>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -55,6 +55,7 @@ git push -u origin main`;
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             style={{
               width: '36px',
               height: '36px',
@@ -154,7 +155,6 @@ git push -u origin main`;
 
         </div>
 
-      </div>
-    </div>
+    </Modal>
   );
 }

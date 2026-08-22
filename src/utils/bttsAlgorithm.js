@@ -281,20 +281,44 @@ export function calculateBTTSMetrics(match) {
   };
 }
 
+/**
+ * Compares the model's probability with a price.
+ *
+ * Returns two different quantities, because the UI used to conflate them:
+ *
+ *   edgePoints       model% minus the price's implied% - a difference in
+ *                    percentage points
+ *   expectedValuePct expected return per unit staked, (p x odds - 1) x 100
+ *
+ * At 71% against odds of 1.85 the edge is +16.9 points but the expected
+ * value is +31.3%. Both are useful; they are not the same number, and the
+ * smaller one was the one labelled "Expected Value". They always share a
+ * sign, so the old label never pointed at the wrong side of a bet - it just
+ * understated the size of it.
+ */
 export function calculateValue(bttsScore, bookieOdds) {
+  const odds = Number(bookieOdds);
   if (bttsScore === null || bttsScore === undefined ||
-      !bookieOdds || isNaN(bookieOdds) || bookieOdds <= 1) {
-    return { hasValue: false, valueMargin: 0, impliedBookieProb: 0 };
+      !odds || Number.isNaN(odds) || odds <= 1) {
+    return {
+      hasValue: false,
+      isPositive: false,
+      edgePoints: 0,
+      expectedValuePct: 0,
+      impliedBookieProb: 0
+    };
   }
 
-  const impliedBookieProb = (1 / bookieOdds) * 100;
-  const valueMargin = (bttsScore - impliedBookieProb).toFixed(1);
-  const hasValue = parseFloat(valueMargin) > 0;
+  const impliedBookieProb = (1 / odds) * 100;
+  const edgePoints = bttsScore - impliedBookieProb;
+  const expectedValuePct = ((bttsScore / 100) * odds - 1) * 100;
+  const isPositive = edgePoints > 0;
 
   return {
-    hasValue,
-    valueMargin: Math.abs(valueMargin),
-    isPositive: parseFloat(valueMargin) > 0,
+    hasValue: isPositive,
+    isPositive,
+    edgePoints: Math.abs(edgePoints).toFixed(1),
+    expectedValuePct: Math.abs(expectedValuePct).toFixed(1),
     impliedBookieProb: impliedBookieProb.toFixed(1)
   };
 }

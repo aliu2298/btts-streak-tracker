@@ -1,6 +1,6 @@
 import React from 'react';
 import { Flame, Calendar, Search, Github, Key, Sparkles } from 'lucide-react';
-import { getAvailableDates } from '../services/demoData';
+import { getAvailableDates } from '../services/dates';
 
 export default function Header({ 
   selectedDate, 
@@ -95,46 +95,29 @@ export default function Header({
         </div>
 
         {/* Bottom Bar: Date Selector, Search & Filter Toggles */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          paddingTop: '0.75rem',
-          borderTop: '1px solid var(--border-subtle)'
-        }}>
+        <div className="header-controls">
           {/* Date Selector Tabs */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(0, 0, 0, 0.25)', padding: '0.25rem', borderRadius: 'var(--radius-md)' }}>
+          <div className="date-tabs">
             {dates.map(d => {
               const isSelected = selectedDate === d.dateStr;
               return (
                 <button
                   key={d.key}
+                  className={`date-tab${isSelected ? ' is-selected' : ''}`}
+                  aria-pressed={isSelected}
                   onClick={() => onSelectDate(d.dateStr)}
-                  style={{
-                    padding: '0.45rem 0.9rem',
-                    borderRadius: 'var(--radius-sm)',
-                    fontSize: '0.825rem',
-                    fontWeight: isSelected ? 700 : 500,
-                    background: isSelected ? 'var(--accent-emerald)' : 'transparent',
-                    color: isSelected ? '#000' : 'var(--text-muted)',
-                    transition: 'all 0.2s ease',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.4rem'
-                  }}
                 >
-                  <Calendar size={14} />
-                  {d.label}
-                  <span style={{ opacity: isSelected ? 0.85 : 0.6, fontSize: '0.75rem' }}>({d.display})</span>
+                  <Calendar size={14} className="date-tab-icon" />
+                  <span className="date-tab-label-full">{d.label}</span>
+                  <span className="date-tab-label-short">{d.shortLabel}</span>
+                  <span className="date-tab-display">({d.display})</span>
                 </button>
               );
             })}
           </div>
 
           {/* Search Input & High BTTS Filter */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexGrow: 1, maxWidth: '480px' }}>
+          <div className="header-search">
             <div style={{ position: 'relative', flexGrow: 1 }}>
               <Search size={16} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }} />
               <input
