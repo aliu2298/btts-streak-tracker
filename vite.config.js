@@ -7,6 +7,9 @@ export default defineConfig({
   base: './', // Crucial for GitHub Pages subpath deployment
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    // 'hidden' still emits the map for local debugging but drops the
+    // //# sourceMappingURL comment, so the 590KB map - 2.5x the bundle -
+    // is not fetched by every visitor to the published site.
+    sourcemap: 'hidden',
   }
 })

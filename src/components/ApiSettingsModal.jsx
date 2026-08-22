@@ -96,7 +96,9 @@ export default function ApiSettingsModal({ onClose, onReloadData }) {
               Optional Football-Data.org API Token:
             </label>
             <input
-              type="text"
+              type="password"
+              autoComplete="off"
+              spellCheck={false}
               placeholder="Paste your free API token here..."
               value={key}
               onChange={(e) => setKey(e.target.value)}

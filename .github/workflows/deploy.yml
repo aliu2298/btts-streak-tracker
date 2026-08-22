@@ -3,6 +3,7 @@ name: Deploy BTTS Streak Tracker to GitHub Pages
 on:
   push:
     branches: [ main, master ]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -11,7 +12,9 @@ permissions:
   id-token: write
 
 concurrency:
-  group: 'pages'
+  # Scoped per ref: a shared 'pages' group would let a pull request run
+  # cancel an in-flight production deploy.
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -33,12 +36,21 @@ jobs:
       - name: Build Project
         run: npm run build
 
+      - name: Strip sourcemaps from the published bundle
+        if: github.event_name != 'pull_request'
+        run: rm -f dist/assets/*.map
+
       - name: Upload artifact
+        # Only the deploy path needs the Pages artifact; pull requests just
+        # need lint, test and build to have passed.
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
 
   deploy:
+    # Never publish from a pull request.
+    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
