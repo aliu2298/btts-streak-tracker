@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Flame, Calculator, TrendingUp, CheckCircle, AlertTriangle, Layers, ExternalLink } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { calculateValue, getKalshiUrl } from '../utils/bttsAlgorithm';
+import Modal from './Modal';
 
 export default function FixtureDetailModal({ fixture, metrics, onClose }) {
   // Hooks must run unconditionally - an early return above useState made the
@@ -28,8 +29,7 @@ export default function FixtureDetailModal({ fixture, metrics, onClose }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <Modal onClose={onClose} labelledBy="fixture-detail-title">
         
         {/* Modal Header */}
         <div style={{
@@ -44,12 +44,13 @@ export default function FixtureDetailModal({ fixture, metrics, onClose }) {
             <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase' }}>
               {fixture.leagueName} • Kick-off {fixture.time}
             </span>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
+            <h2 id="fixture-detail-title" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
               {homeTeam.name} vs {awayTeam.name}
             </h2>
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             style={{
               width: '36px',
               height: '36px',
@@ -357,7 +358,6 @@ export default function FixtureDetailModal({ fixture, metrics, onClose }) {
 
         </div>
 
-      </div>
-    </div>
+    </Modal>
   );
 }

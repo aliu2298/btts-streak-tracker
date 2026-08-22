@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Key, ShieldCheck, RefreshCw, Trash2, Info } from 'lucide-react';
 import { getStoredApiKey, saveApiKey, clearApiKey } from '../services/apiService';
+import Modal from './Modal';
 
 export default function ApiSettingsModal({ onClose, onReloadData }) {
   const [key, setKey] = useState(getStoredApiKey());
@@ -25,8 +26,7 @@ export default function ApiSettingsModal({ onClose, onReloadData }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '560px' }}>
+    <Modal onClose={onClose} labelledBy="api-settings-title" maxWidth={'560px'}>
         
         {/* Header */}
         <div style={{
@@ -51,7 +51,7 @@ export default function ApiSettingsModal({ onClose, onReloadData }) {
               <Key size={22} color="var(--accent-cyan)" />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
+              <h2 id="api-settings-title" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
                 Live API & Data Settings
               </h2>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -61,6 +61,7 @@ export default function ApiSettingsModal({ onClose, onReloadData }) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             style={{
               width: '36px',
               height: '36px',
@@ -166,7 +167,6 @@ export default function ApiSettingsModal({ onClose, onReloadData }) {
 
         </form>
 
-      </div>
-    </div>
+    </Modal>
   );
 }
