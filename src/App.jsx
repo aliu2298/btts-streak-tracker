@@ -8,7 +8,7 @@ import FixtureDetailModal from './components/FixtureDetailModal';
 import GitHubGuideModal from './components/GitHubGuideModal';
 import ApiSettingsModal from './components/ApiSettingsModal';
 import { fetchMatches } from './services/apiService';
-import { getAvailableDates } from './services/mockDataGenerator';
+import { getAvailableDates } from './services/dates';
 import { calculateBTTSMetrics, HIGH_CONFIDENCE_THRESHOLD } from './utils/bttsAlgorithm';
 import { Flame, ArrowUpDown, RefreshCw, AlertCircle, Info } from 'lucide-react';
 

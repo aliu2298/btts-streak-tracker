@@ -3,25 +3,7 @@
  * Premier League, La Liga, Serie A, Bundesliga, Ligue 1 & Champions League
  */
 
-function getFormattedDate(offsetDays = 0) {
-  const d = new Date();
-  d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().split('T')[0];
-}
-
-function getDisplayDate(offsetDays = 0) {
-  const d = new Date();
-  d.setDate(d.getDate() + offsetDays);
-  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-}
-
-export function getAvailableDates() {
-  return [
-    { key: 'today', label: 'Today', dateStr: getFormattedDate(0), display: getDisplayDate(0) },
-    { key: 'tomorrow', label: 'Tomorrow (Focus)', dateStr: getFormattedDate(1), display: getDisplayDate(1), isDefault: true },
-    { key: 'nextDay', label: 'Day After', dateStr: getFormattedDate(2), display: getDisplayDate(2) },
-  ];
-}
+import { getFormattedDate } from './dates';
 
 export const GAMEWEEKS = [
   { id: 'gw1', label: 'Gameweek 1 (Official)', isCurrent: true },
