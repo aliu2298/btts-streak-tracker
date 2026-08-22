@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, afterAll } from 'vitest';
 import { toLocalDateStr, getFormattedDate, getAvailableDates } from './dates';
 
 const originalTZ = process.env.TZ;

@@ -295,3 +295,96 @@ input, select {
   border-color: var(--text-dim);
   color: var(--text-dim);
 }
+
+/* ---------------------------------------------------------------------
+   Header controls.
+
+   These live in CSS rather than inline style objects because they need
+   media queries: the date row was a nowrap flex with no overflow rule, so
+   on a 375px phone it was 416px wide and pushed the whole page into a
+   horizontal scroll. Inline styles cannot express a breakpoint.
+   --------------------------------------------------------------------- */
+.header-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-subtle);
+  min-width: 0;
+}
+
+.header-search {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-grow: 1;
+  min-width: 0;
+  max-width: 480px;
+}
+
+.date-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.25rem;
+  border-radius: var(--radius-md);
+  /* Contain the row instead of letting it widen the page. */
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.date-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.825rem;
+  font-weight: 500;
+  background: transparent;
+  color: var(--text-muted);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.date-tab.is-selected {
+  background: var(--accent-emerald);
+  color: #000;
+  font-weight: 700;
+}
+
+.date-tab-display {
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+.date-tab.is-selected .date-tab-display {
+  opacity: 0.85;
+}
+
+.date-tab-label-short {
+  display: none;
+}
+
+/* Trim the tabs down on narrow screens so all three fit without scrolling:
+   the parenthetical date goes first, then the icon, then the long label. */
+@media (max-width: 640px) {
+  .date-tab-display,
+  .date-tab-icon,
+  .date-tab-label-full {
+    display: none;
+  }
+
+  .date-tab-label-short {
+    display: inline;
+  }
+
+  .date-tab {
+    padding: 0.45rem 0.75rem;
+  }
+}
