@@ -323,10 +323,10 @@ export default function FixtureDetailModal({ fixture, metrics, onClose }) {
                     <div style={{ padding: '0.75rem', background: 'rgba(0, 245, 155, 0.15)', border: '1px solid var(--accent-emerald)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div>
                         <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-emerald)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                          <CheckCircle size={16} /> +{valueResult.valueMargin}% Expected Value Bet!
+                          <CheckCircle size={16} /> +{valueResult.expectedValuePct}% expected value
                         </span>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          Market Implied Prob: {valueResult.impliedBookieProb}% vs Model: {pct(metrics.score)}
+                          Model {pct(metrics.score)} vs market {valueResult.impliedBookieProb}% — an edge of {valueResult.edgePoints} points
                         </span>
                       </div>
                       <button 
@@ -339,10 +339,10 @@ export default function FixtureDetailModal({ fixture, metrics, onClose }) {
                   ) : (
                     <div style={{ padding: '0.75rem', background: 'rgba(244, 63, 94, 0.15)', border: '1px solid var(--accent-rose)', borderRadius: 'var(--radius-sm)' }}>
                       <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent-rose)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                        <AlertTriangle size={16} /> No Value (-{valueResult.valueMargin}% Margin)
+                        <AlertTriangle size={16} /> −{valueResult.expectedValuePct}% expected value
                       </span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        Market implied probability ({valueResult.impliedBookieProb}%) is higher than model prediction ({pct(metrics.score)}).
+                        Model {pct(metrics.score)} vs market {valueResult.impliedBookieProb}% — the market prices this higher than the model does.
                       </span>
                     </div>
                   )
