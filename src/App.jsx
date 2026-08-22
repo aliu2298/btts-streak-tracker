@@ -209,9 +209,9 @@ export default function App() {
         gap: '0.75rem'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>
+          <h2 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>
             Upcoming Top 5 League Matchups
-          </span>
+          </h2>
           <span style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.08)', padding: '0.15rem 0.6rem', borderRadius: '9999px', color: 'var(--text-muted)', fontWeight: 700 }}>
             {filteredMetricsList.length} matches found
           </span>
@@ -220,8 +220,9 @@ export default function App() {
         {/* Sort Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <ArrowUpDown size={15} color="var(--text-muted)" />
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Sort by:</span>
+          <label htmlFor="sort-fixtures" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Sort by:</label>
           <select
+            id="sort-fixtures"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             style={{

@@ -18,7 +18,11 @@
   /* Text Colors */
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  --text-dim: #64748b;
+  /* 4.5:1 against the card background (#121826) so small dim text clears
+     WCAG AA. The previous #64748b measured 3.73:1 there, and it is the
+     colour used for fair odds, league names and the whole "no form data"
+     state - the least certain information was the hardest to read. */
+  --text-dim: #7d8ba3;
 
   /* Font Families */
   --font-heading: 'Outfit', sans-serif;
@@ -387,4 +391,27 @@ input, select {
   .date-tab {
     padding: 0.45rem 0.75rem;
   }
+}
+
+
+/* Visible keyboard focus. The reset strips button borders and backgrounds,
+   and nothing defined a focus style, so keyboard users had only the browser
+   default ring over a dark custom theme. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Available to screen readers, not shown on screen. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

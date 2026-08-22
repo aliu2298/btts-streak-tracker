@@ -22,6 +22,11 @@ export default function FixtureCard({ fixture, onSelectFixture }) {
       borderLeft: `4px solid ${metrics.tierColor}`
     }}>
       
+      <h3 className="sr-only">
+        {homeTeam.name} versus {awayTeam.name}
+        {hasScore ? `, ${metrics.score}% BTTS probability` : ', not scored'}
+      </h3>
+
       {/* Top Bar: League & Exact Kickoff Date & Time */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
